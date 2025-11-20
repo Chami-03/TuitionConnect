@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Your Tutor</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .time-slot {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .time-slot:hover {
+            background-color: #e9ecef;
+        }
+        .time-slot.selected {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .tutor-card {
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .tutor-card:hover {
+            border-color: #dee2e6;
+        }
+        .tutor-card.selected {
+            border-color: #0d6efd;
+            background-color: #f8f9fa;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .spinner {
+            width: 3rem;
+            height: 3rem;
+        }
+        .booking-success {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            text-align: center;
+        }
+        .booking-success-content {
+            max-width: 500px;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body>
+<div class="container my-5">
+  <h2 class="text-center mb-4"><i class="fas fa-search me-2"></i>Book Your Tutor</h2>
+  
+  <!-- Step 1: Select Subject -->
+  <div class="card shadow step-content" id="content-1">
+    <div class="card-body">
+      <form id="subject-form">
+        <div class="mb-3">
+          <label for="subject" class="form-label">Select Subject</label>
+          <select class="form-select" id="subject" required>
+            <option value="">-- Select a subject --</option>
+            <!-- Subject options will be populated dynamically -->
+          </select>
+          <small class="form-text text-muted">Choose the subject you need tutoring for.</small>
+        </div>
+        <div class="mb-3">
+          <label for="education-level" class="form-label">Education Level</label>
+          <select class="form-select" id="education-level" required>
+            <option value="">-- Select education level --</option>
+            <option value="school">School</option>
+            <option value="college">College/University</option>
+            <option value="professional">Professional Development</option>
+          </select>
+          <small class="form-text text-muted">Select your current education level.</small>
+        </div>
+        <button type="button" class="btn btn-primary w-100" onclick="nextStep(1)">Find Tutors</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Step 2: Choose Tutor -->
+  <div class="card shadow step-content d-none" id="content-2">
+    <div class="card-body">
+      <h5>Available Tutors</h5>
+      <div id="tutor-list" class="row">
+        <!-- Tutors populated dynamically -->
+      </div>
+      <div class="d-flex justify-content-between mt-3">
+        <button type="button" class="btn btn-outline-secondary" onclick="prevStep(2)">Back</button>
+        <button type="button" class="btn btn-primary" onclick="nextStep(2)" id="next-step-2" disabled>Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Pick Time -->
+  <div class="card shadow step-content d-none" id="content-3">
+    <div class="card-body">
+      <h5 class="mb-4">Select Date & Time</h5>
+      <form id="time-form">
+        <!-- Date Selection -->
+        <div class="mb-4">
+          <label for="session-date" class="form-label">Select Date</label>
+          <div class="input-group">
+            <input type="date" class="form-control" id="session-date" required min="2025-05-19">
+            <span class="input-group-text bg-white">
+              <i class="fas fa-calendar text-primary"></i>
+            </span>
+          </div>
+          <small class="form-text text-muted">Choose your preferred session date</small>
+        </div>
+
+        <!-- Time Slots -->
+        <div class="mb-4">
+          <label class="form-label">Available Time Slots</label>
+          <div id="time-slots" class="d-flex flex-wrap gap-2">
+            <!-- Time slots will be populated here -->
+          </div>
+          <small class="form-text text-muted mt-2">Selected time: <span id="selected-time" class="text-primary fw-bold">Not selected</span></small>
+        </div>
+
+        <!-- Duration Selection -->
+        <div class="mb-4">
+          <label for="duration" class="form-label">Session Duration</label>
+          <div class="input-group">
+            <select class="form-select" id="duration" required>
+              <option value="">Select duration</option>
+              <option value="1">1 hour ($<span class="duration-price">0.00</span>)</option>
+              <option value="1.5">1.5 hours ($<span class="duration-price">0.00</span>)</option>
+              <option value="2">2 hours ($<span class="duration-price">0.00</span>)</option>
+            </select>
+            <span class="input-group-text bg-white">
+              <i class="fas fa-clock text-primary"></i>
+            </span>
+          </div>
+          <small class="form-text text-muted">Choose how long you'd like your session to be</small>
+        </div>
+
+        <!-- Special Requests -->
+        <div class="mb-4">
+          <label for="special-requests" class="form-label">Special Requests (Optional)</label>
+          <textarea class="form-control" id="special-requests" rows="3" placeholder="Enter any specific requirements or topics you'd like to focus on"></textarea>
+        </div>
+
+        <!-- Session Summary -->
+        <div class="card bg-light border-0 p-4 mb-4">
+          <h6 class="mb-3">Session Summary</h6>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-user-circle fa-2x text-primary me-3"></i>
+                <div>
+                  <small class="text-muted">Tutor</small>
+                  <p class="mb-0 fw-bold" id="summary-tutor-name">Not selected</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-book fa-2x text-success me-3"></i>
+                <div>
+                  <small class="text-muted">Subject</small>
+                  <p class="mb-0 fw-bold" id="summary-subject-name">Not selected</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-calendar-alt fa-2x text-info me-3"></i>
+                <div>
+                  <small class="text-muted">Date</small>
+                  <p class="mb-0 fw-bold" id="summary-date-selected">Not selected</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-clock fa-2x text-warning me-3"></i>
+                <div>
+                  <small class="text-muted">Time & Duration</small>
+                  <p class="mb-0 fw-bold" id="summary-time-duration">Not selected</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center">
+          <button type="button" class="btn btn-outline-secondary" onclick="prevStep(3)">
+            <i class="fas fa-arrow-left me-2"></i>Back
+          </button>
+          <button type="button" class="btn btn-primary" onclick="nextStep(3)" id="next-step-3" disabled>
+            Next<i class="fas fa-arrow-right ms-2"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Step 4: Confirm -->
+  <div class="card shadow step-content d-none" id="content-5">
+    <div class="card-body">
+      <div class="confirmation-header text-center mb-4">
+        <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+        <h4 class="mb-2">Almost Done!</h4>
+        <p class="text-muted">Please review your booking details below</p>
+      </div>
+
+      <div class="row g-4">
+        <!-- Tutor Details -->
+        <div class="col-md-6">
+          <div class="confirmation-section">
+            <div class="d-flex align-items-center mb-3">
+              <i class="fas fa-user-circle fa-2x text-primary me-3"></i>
+              <h5 class="mb-0">Tutor Details</h5>
+            </div>
+            <div class="confirmation-details">
+              <p class="mb-2"><strong>Name:</strong> <span id="confirm-tutor">Not selected</span></p>
+              <p class="mb-2"><strong>Rate:</strong> <span id="confirm-rate">$0/hour</span></p>
+              <p class="mb-2"><strong>Subject:</strong> <span id="confirm-subject">Not selected</span></p>
+              <div class="tutor-rating mt-2">
+                <div class="stars">
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star-half-alt text-warning"></i>
+                </div>
+                <small class="text-muted" id="confirm-rating">4.8 (120+ reviews)</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Session Details -->
+        <div class="col-md-6">
+          <div class="confirmation-section">
+            <div class="d-flex align-items-center mb-3">
+              <i class="fas fa-calendar-check fa-2x text-success me-3"></i>
+              <h5 class="mb-0">Session Details</h5>
+            </div>
+            <div class="confirmation-details">
+              <p class="mb-2"><strong>Date:</strong> <span id="confirm-date">Not selected</span></p>
+              <p class="mb-2"><strong>Time:</strong> <span id="confirm-time">Not selected</span></p>
+              <p class="mb-2"><strong>Duration:</strong> <span id="confirm-duration">Not selected</span></p>
+              <p class="mb-2"><strong>Total:</strong> <span id="confirm-total">$0.00</span></p>
+              <div class="session-reminder mt-2">
+                <i class="fas fa-bell text-warning me-2"></i>
+                <small>You'll receive a reminder 24 hours before your session</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Special Requests Section (if any) -->
+      <div id="special-requests-section" class="mb-4 d-none">
+        <div class="d-flex align-items-center mb-3">
+          <i class="fas fa-comment-alt fa-2x text-info me-3"></i>
+          <h5 class="mb-0">Special Requests</h5>
+        </div>
+        <div class="p-3 bg-light rounded">
+          <p id="confirm-special-requests" class="mb-0"></p>
+        </div>
+      </div>
+
+      <div class="confirmation-actions mt-4">
+        <div class="d-flex justify-content-between align-items-center">
+          <button type="button" class="btn btn-outline-secondary" onclick="prevStep(5)">
+            <i class="fas fa-arrow-left me-2"></i>Back
+          </button>
+          <button type="button" class="btn btn-primary btn-lg" onclick="confirmBooking()">
+            Confirm Booking<i class="fas fa-check ms-2"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay d-none" id="loading-overlay">
+  <div class="spinner-border text-primary spinner" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+
+<!-- Booking Success Screen -->
+<div class="booking-success d-none" id="booking-success">
+  <div class="booking-success-content">
+    <i class="fas fa-check-circle text-success fa-4x mb-4"></i>
+    <h3 class="mb-3">Booking Confirmed!</h3>
+    <p class="mb-4">Your tutoring session has been successfully booked. You'll receive a confirmation email shortly.</p>
+    <div id="booking-success-details" class="mb-4 text-start">
+      <!-- Details filled dynamically -->
+    </div>
+    <button type="button" class="btn btn-primary" onclick="hideSuccessScreen()">
+      Book Another Session
+    </button>
+  </div>
+</div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// Global variables to store state
+let subjects = [];
+let tutors = [];
+let selectedSubject = '';
+let selectedEducationLevel = '';
+let selectedTutor = null;
+let selectedDate = '';
+let selectedTimeSlot = '';
+let selectedDuration = '';
+let specialRequests = '';
+let totalPrice = 0;
+
+// Constants for API endpoints
+const API_BASE_URL = 'http://localhost:8080/api';
+const SUBJECTS_ENDPOINT = 'http://localhost:8080/api/subjects';
+const TUTORS_ENDPOINT = `${API_BASE_URL}/tutors`;
+const BOOKINGS_ENDPOINT = `${API_BASE_URL}/bookings`;
+
+// Initialize the application
+document.addEventListener('DOMContentLoaded', function() {
+    // Set min date for session-date input to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('session-date').min = today;
+    
+    // Fetch subjects from API
+    fetchSubjects();
+    
+    // Set up event listeners
+    document.getElementById('subject').addEventListener('change', handleSubjectChange);
+    document.getElementById('education-level').addEventListener('change', handleEducationLevelChange);
+    document.getElementById('session-date').addEventListener('change', handleDateChange);
+    document.getElementById('duration').addEventListener('change', handleDurationChange);
+    document.getElementById('special-requests').addEventListener('input', handleSpecialRequestsChange);
+
+    // Set up payment method selector - can be added if payment method selection is needed
+    // document.querySelectorAll('input[name="payment-method"]').forEach(el => {
+    //     el.addEventListener('change', handlePaymentMethodChange);
+    // });
+});
+
+// Fetch subjects from the API
+async function fetchSubjects() {
+    try {
+        const response = await fetch(SUBJECTS_ENDPOINT);
+        if (!response.ok) {
+            throw new Error('Failed to fetch subjects');
+        }
+        
+        subjects = await response.json();
+        populateSubjectDropdown(subjects);
+    } catch (error) {
+        console.error('Error fetching subjects:', error);
+        alert('Failed to load subjects. Please refresh the page and try again.');
+    }
+}
+
+// Populate the subject dropdown with data from API
+function populateSubjectDropdown(subjects) {
+    const subjectSelect = document.getElementById('subject');
+    subjectSelect.innerHTML = '<option value="">-- Select a subject --</option>';
+    
+    subjects.forEach(subject => {
+        const option = document.createElement('option');
+        option.value = subject.code;
+        option.textContent = `${subject.code} - ${subject.name}`;
+        subjectSelect.appendChild(option);
+    });
+}
+
+// Fetch tutors from the API
+async function fetchTutors() {
+    try {
+        const response = await fetch(TUTORS_ENDPOINT);
+        if (!response.ok) {
+            throw new Error('Failed to fetch tutors');
+        }
+        
+        tutors = await response.json();
+        filterAndDisplayTutors();
+    } catch (error) {
+        console.error('Error fetching tutors:', error);
+        alert('Failed to load tutors. Please try again.');
+    }
+}
+
+// Filter tutors based on selected subject and display them
+function filterAndDisplayTutors() {
+    const tutorListContainer = document.getElementById('tutor-list');
+    tutorListContainer.innerHTML = '';
+    
+    // Filter tutors that match the selected subject
+    const filteredTutors = tutors.filter(tutor => 
+        tutor.subjects.some(subject => 
+            subject.toLowerCase().includes(selectedSubject.toLowerCase())
+        )
+    );
+    
+    if (filteredTutors.length === 0) {
+        tutorListContainer.innerHTML = '<div class="col-12 text-center py-4"><p class="text-muted">No tutors available for the selected subject.</p></div>';
+        return;
+    }
+    
+    // Create tutor cards
+    filteredTutors.forEach(tutor => {
+        const tutorCard = document.createElement('div');
+        tutorCard.className = 'col-md-6 col-lg-4 mb-4';
+        tutorCard.innerHTML = `
+            <div class="card tutor-card h-100" data-tutor-id="${tutor.id}">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            <i class="fas fa-user-circle fa-3x text-secondary"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-0">${tutor.fullName}</h5>
+                            <div class="d-flex align-items-center">
+                                <div class="text-warning me-1">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <span>${tutor.rating}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="card-text text-muted">${tutor.bio}</p>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>
+                            <span class="badge bg-light text-dark me-1">${tutor.experienceYears} years</span>
+                            ${tutor.subjects.map(subj => 
+                                `<span class="badge bg-info text-dark me-1">${subj}</span>`
+                            ).join('')}
+                        </div>
+                        <div class="text-success fw-bold">$${tutor.hourlyRate}/hr</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        tutorListContainer.appendChild(tutorCard);
+        
+        // Add click event to select tutor
+        const card = tutorCard.querySelector('.tutor-card');
+        card.addEventListener('click', () => selectTutor(tutor, card));
+    });
+}
+
+// Select a tutor
+function selectTutor(tutor, card) {
+    // Reset previous selection
+    document.querySelectorAll('.tutor-card.selected').forEach(el => {
+        el.classList.remove('selected');
+    });
+    
+    // Set new selection
+    card.classList.add('selected');
+    selectedTutor = tutor;
+    
+    // Update session summary and confirmation details
+    document.getElementById('summary-tutor-name').textContent = tutor.fullName;
+    document.getElementById('confirm-tutor').textContent = tutor.fullName;
+    document.getElementById('confirm-rate').textContent = `$${tutor.hourlyRate}/hour`;
+    document.getElementById('confirm-rating').textContent = `${tutor.rating} (${Math.floor(tutor.rating * 25)}+ reviews)`;
+    
+    // Update duration prices
+    document.querySelectorAll('.duration-price').forEach((el, index) => {
+        const multiplier = index === 0 ? 1 : index === 1 ? 1.5 : 2;
+        el.textContent = (tutor.hourlyRate * multiplier).toFixed(2);
+    });
+    
+    // Enable next button
+    document.getElementById('next-step-2').disabled = false;
+    
+    // Generate time slots if date is already selected
+    if (selectedDate) {
+        generateTimeSlots();
+    }
+}
+
+// Generate time slots based on tutor availability
+function generateTimeSlots() {
+    const timeSlotsContainer = document.getElementById('time-slots');
+    timeSlotsContainer.innerHTML = '';
+    
+    if (!selectedTutor || !selectedDate) {
+        return;
+    }
+    
+    const date = new Date(selectedDate);
+    const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
+    
+    // Find tutor's availability for the selected day
+    const availability = selectedTutor.availability.find(
+        avail => avail.day === dayOfWeek
+    );
+    
+    if (!availability) {
+        timeSlotsContainer.innerHTML = `<p class="text-muted">The tutor is not available on ${dayOfWeek}s.</p>`;
+        return;
+    }
+    
+    const { startTime, endTime } = availability;
+    const timeSlots = generateTimeSlotsArray(startTime, endTime);
+    
+    if (timeSlots.length === 0) {
+        timeSlotsContainer.innerHTML = '<p class="text-muted">No time slots available for this day.</p>';
+        return;
+    }
+    
+    // Create time slot buttons
+    timeSlots.forEach(slot => {
+        const button = document.createElement('button');
+        button.className = 'btn btn-outline-primary time-slot me-2 mb-2';
+        button.type = 'button';
+        button.textContent = slot;
+        button.addEventListener('click', () => selectTimeSlot(slot, button));
+        timeSlotsContainer.appendChild(button);
+    });
+}
+
+// Helper function to generate array of time slots
+function generateTimeSlotsArray(startTime, endTime) {
+    const slots = [];
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
+    
+    let currentHour = startHour;
+    let currentMinute = startMinute;
+    
+    while (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute)) {
+        slots.push(`${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`);
+        
+        // Add 30 minutes
+        currentMinute += 30;
+        if (currentMinute >= 60) {
+            currentHour += 1;
+            currentMinute = 0;
+        }
+    }
+    
+    return slots;
+}
+
+// Select a time slot
+function selectTimeSlot(slot, button) {
+    // Reset previous selection
+    document.querySelectorAll('.time-slot.selected').forEach(el => {
+        el.classList.remove('selected');
+    });
+    
+    // Set new selection
+    button.classList.add('selected');
+    selectedTimeSlot = slot;
+    
+    // Update UI
+    document.getElementById('selected-time').textContent = slot;
+    document.getElementById('summary-time-duration').textContent = selectedDuration 
+        ? `${slot} (${selectedDuration} hour${selectedDuration !== '1' ? 's' : ''})`
+        : slot;
+    
+    document.getElementById('confirm-time').textContent = slot;
+    
+    // Enable next button if duration is also selected
+    document.getElementById('next-step-3').disabled = !(selectedTimeSlot && selectedDuration);
+    
+    updateSessionSummary();
+}
+
+// Handle subject change
+function handleSubjectChange(event) {
+    selectedSubject = event.target.value;
+    const selectedSubjectData = subjects.find(s => s.code === selectedSubject);
+    
+    if (selectedSubjectData) {
+        document.getElementById('summary-subject-name').textContent = selectedSubjectData.name;
+        document.getElementById('confirm-subject').textContent = selectedSubjectData.name;
+    } else {
+        document.getElementById('summary-subject-name').textContent = 'Not selected';
+        document.getElementById('confirm-subject').textContent = 'Not selected';
+    }
+}
+
+// Handle education level change
+function handleEducationLevelChange(event) {
+    selectedEducationLevel = event.target.value;
+}
+
+// Handle date change
+function handleDateChange(event) {
+    selectedDate = event.target.value;
+    
+    if (selectedDate) {
+        const formattedDate = new Date(selectedDate).toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        
+        document.getElementById('summary-date-selected').textContent = formattedDate;
+        document.getElementById('confirm-date').textContent = formattedDate;
+        
+        // Generate time slots if tutor is selected
+        if (selectedTutor) {
+            generateTimeSlots();
+        }
+    } else {
+        document.getElementById('summary-date-selected').textContent = 'Not selected';
+        document.getElementById('confirm-date').textContent = 'Not selected';
+    }
+    
+    // Reset time slot selection
+    selectedTimeSlot = '';
+    document.getElementById('selected-time').textContent = 'Not selected';
+    document.getElementById('time-slots').innerHTML = '';
+    document.getElementById('next-step-3').disabled = true;
+    
+    updateSessionSummary();
+}
+
+// Handle duration change
+function handleDurationChange(event) {
+    selectedDuration = event.target.value;
+    
+    if (selectedDuration && selectedTutor) {
+        const hours = parseFloat(selectedDuration);
+        totalPrice = selectedTutor.hourlyRate * hours;
+        
+        document.getElementById('summary-time-duration').textContent = selectedTimeSlot 
+            ? `${selectedTimeSlot} (${hours} hour${hours !== 1 ? 's' : ''})`
+            : `Not selected (${hours} hour${hours !== 1 ? 's' : ''})`;
+        
+        document.getElementById('confirm-duration').textContent = `${hours} hour${hours !== 1 ? 's' : ''}`;
+        document.getElementById('confirm-total').textContent = `$${totalPrice.toFixed(2)}`;
+    } else {
+        document.getElementById('summary-time-duration').textContent = selectedTimeSlot || 'Not selected';
+        document.getElementById('confirm-duration').textContent = 'Not selected';
+        document.getElementById('confirm-total').textContent = '$0.00';
+    }
+    
+    // Enable next button if time slot is also selected
+    document.getElementById('next-step-3').disabled = !(selectedTimeSlot && selectedDuration);
+    
+    updateSessionSummary();
+}
+
+// Handle special requests change
+function handleSpecialRequestsChange(event) {
+    specialRequests = event.target.value;
+    
+    // Update confirmation page
+    const specialRequestsSection = document.getElementById('special-requests-section');
+    const confirmSpecialRequests = document.getElementById('confirm-special-requests');
+    
+    if (specialRequests.trim()) {
+        confirmSpecialRequests.textContent = specialRequests;
+        specialRequestsSection.classList.remove('d-none');
+    } else {
+        confirmSpecialRequests.textContent = '';
+        specialRequestsSection.classList.add('d-none');
+    }
+}
+
+// Update session summary
+function updateSessionSummary() {
+    // This function updates all summary fields based on current selections
+    const subjectData = subjects.find(s => s.code === selectedSubject);
+    
+    if (subjectData) {
+        document.getElementById('summary-subject-name').textContent = subjectData.name;
+        document.getElementById('confirm-subject').textContent = subjectData.name;
+    }
+    
+    if (selectedTutor) {
+        document.getElementById('summary-tutor-name').textContent = selectedTutor.fullName;
+        document.getElementById('confirm-tutor').textContent = selectedTutor.fullName;
+        document.getElementById('confirm-rate').textContent = `$${selectedTutor.hourlyRate}/hour`;
+    }
+    
+    if (selectedDate) {
+        const formattedDate = new Date(selectedDate).toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        document.getElementById('summary-date-selected').textContent = formattedDate;
+        document.getElementById('confirm-date').textContent = formattedDate;
+    }
+    
+    if (selectedTimeSlot && selectedDuration) {
+        const hours = parseFloat(selectedDuration);
+        document.getElementById('summary-time-duration').textContent = `${selectedTimeSlot} (${hours} hour${hours !== 1 ? 's' : ''})`;
+        document.getElementById('confirm-time').textContent = selectedTimeSlot;
+        document.getElementById('confirm-duration').textContent = `${hours} hour${hours !== 1 ? 's' : ''}`;
+        
+        if (selectedTutor) {
+            totalPrice = selectedTutor.hourlyRate * hours;
+            document.getElementById('confirm-total').textContent = `$${totalPrice.toFixed(2)}`;
+        }
+    }
+}
+
+// Next step function
+function nextStep(currentStep) {
+    // Validate current step before proceeding
+    if (currentStep === 1) {
+        if (!selectedSubject || !selectedEducationLevel) {
+            alert('Please select a subject and education level');
+            return;
+        }
+        
+        // Fetch tutors for step 2
+        fetchTutors();
+    } else if (currentStep === 2) {
+        if (!selectedTutor) {
+            alert('Please select a tutor');
+            return;
+        }
+    } else if (currentStep === 3) {
+        if (!selectedDate || !selectedTimeSlot || !selectedDuration) {
+            alert('Please select date, time, and duration');
+            return;
+        }
+    }
+    
+    // Hide current step
+    document.getElementById(`content-${currentStep}`).classList.add('d-none');
+    
+    // Show next step (step 4 is skipped in this implementation)
+    const nextStepNumber = currentStep === 3 ? 5 : currentStep + 1;
+    document.getElementById(`content-${nextStepNumber}`).classList.remove('d-none');
+    
+    // Update confirmation page if moving to last step
+    if (nextStepNumber === 5) {
+        updateSessionSummary();
+    }
+}
+
+// Previous step function
+function prevStep(currentStep) {
+    // Hide current step
+    document.getElementById(`content-${currentStep}`).classList.add('d-none');
+    
+    // Show previous step (step 4 is skipped in this implementation)
+    const prevStepNumber = currentStep === 5 ? 3 : currentStep - 1;
+    document.getElementById(`content-${prevStepNumber}`).classList.remove('d-none');
+}
+
+// Confirm booking function
+async function confirmBooking() {
+    // Validate all required fields are filled
+    if (!selectedSubject || !selectedTutor || !selectedDate || !selectedTimeSlot || !selectedDuration) {
+        alert('Please complete all required fields');
+        return;
+    }
+    
+    // Show loading overlay
+    document.getElementById('loading-overlay').classList.remove('d-none');
+    
+    try {
+        // Calculate end time based on start time and duration
+        const [hours, minutes] = selectedTimeSlot.split(':').map(Number);
+        const startDate = new Date();
+        startDate.setHours(hours);
+        startDate.setMinutes(minutes);
+        
+        const endDate = new Date(startDate);
+        endDate.setHours(startDate.getHours() + parseFloat(selectedDuration));
+        
+        const endTime = `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`;
+        
+        // Create booking object
+        const booking = {
+            userId: 1, // This would typically come from the logged-in user
+            tutorId: selectedTutor.id,
+            subject: subjects.find(s => s.code === selectedSubject)?.name || selectedSubject,
+            sessionDate: `${selectedDate}T${selectedTimeSlot}:00`,
+            startTime: selectedTimeSlot,
+            endTime: endTime,
+            duration: parseFloat(selectedDuration),
+            paymentMethod: "card", // Default payment method
+            total: totalPrice,
+            specialRequests: specialRequests
+        };
+        
+        // Send booking request to API
+        const response = await fetch(BOOKINGS_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(booking)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Booking request failed');
+        }
+        
+        // Booking successful
+        const bookingResult = await response.json();
+        
+        // Populate success screen details
+        const successDetails = document.getElementById('booking-success-details');
+        successDetails.innerHTML = `
+            <div class="mb-2"><strong>Tutor:</strong> ${selectedTutor.fullName}</div>
+            <div class="mb-2"><strong>Subject:</strong> ${subjects.find(s => s.code === selectedSubject)?.name || selectedSubject}</div>
+            <div class="mb-2"><strong>Date:</strong> ${new Date(selectedDate).toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            })}</div>
+            <div class="mb-2"><strong>Time:</strong> ${selectedTimeSlot}</div>
+            <div class="mb-2"><strong>Duration:</strong> ${selectedDuration} hour${parseFloat(selectedDuration) !== 1 ? 's' : ''}</div>
+            <div><strong>Total:</strong> ${totalPrice.toFixed(2)}</div>
+        `;
+        
+        // Hide loading overlay
+        document.getElementById('loading-overlay').classList.add('d-none');
+        
+        // Show success screen
+        document.getElementById('booking-success').classList.remove('d-none');
+        
+        // Reset form
+        resetForm();
+    } catch (error) {
+        console.error('Error making booking:', error);
+        
+        // Hide loading overlay
+        document.getElementById('loading-overlay').classList.add('d-none');
+        
+        // Show error message
+        alert('Failed to make booking. Please try again.');
+    }
+}
+
+// Hide success screen
+function hideSuccessScreen() {
+    document.getElementById('booking-success').classList.add('d-none');
+    showStep(1);
+}
+
+// Reset form function
+function resetForm() {
+    // Reset all selections
+    selectedSubject = '';
+    selectedEducationLevel = '';
+    selectedTutor = null;
+    selectedDate = '';
+    selectedTimeSlot = '';
+    selectedDuration = '';
+    specialRequests = '';
+    totalPrice = 0;
+    
+    // Reset form elements
+    document.getElementById('subject').value = '';
+    document.getElementById('education-level').value = '';
+    document.getElementById('session-date').value = '';
+    document.getElementById('duration').value = '';
+    document.getElementById('special-requests').value = '';
+    
+    // Reset summary and confirmation text
+    document.getElementById('summary-tutor-name').textContent = 'Not selected';
+    document.getElementById('summary-subject-name').textContent = 'Not selected';
+    document.getElementById('summary-date-selected').textContent = 'Not selected';
+    document.getElementById('summary-time-duration').textContent = 'Not selected';
+    document.getElementById('selected-time').textContent = 'Not selected';
+    
+    document.getElementById('confirm-tutor').textContent = 'Not selected';
+    document.getElementById('confirm-subject').textContent = 'Not selected';
+    document.getElementById('confirm-date').textContent = 'Not selected';
+    document.getElementById('confirm-time').textContent = 'Not selected';
+    document.getElementById('confirm-duration').textContent = 'Not selected';
+    document.getElementById('confirm-rate').textContent = '$0/hour';
+    document.getElementById('confirm-total').textContent = '$0.00';
+    
+    // Disable next buttons
+    document.getElementById('next-step-2').disabled = true;
+    document.getElementById('next-step-3').disabled = true;
+    
+    // Clear tutor list and time slots
+    document.getElementById('tutor-list').innerHTML = '';
+    document.getElementById('time-slots').innerHTML = '';
+}
+
+// Show a specific step
+function showStep(stepNumber) {
+    // Hide all steps
+    document.querySelectorAll('.step-content').forEach(el => {
+        el.classList.add('d-none');
+    });
+    
+    // Show the requested step
+    document.getElementById(`content-${stepNumber}`).classList.remove('d-none');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TuitionConnect - Student Registration</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(to right, #e3f2fd, #fce4ec);
+      font-family: 'Segoe UI', sans-serif;
+      transition: background 0.3s ease;
+    }
+    body.dark-mode {
+      background: linear-gradient(to right, #1a1a1a, #2d1b21);
+    }
+    .card {
+      border: none;
+      border-radius: 10px;
+    }
+    .dark-mode .card {
+      background-color: #2d2d2d;
+      color: #e9ecef;
+    }
+    .dark-mode .form-control, .dark-mode .form-select {
+      background-color: #343a40;
+      border-color: #495057;
+      color: #e9ecef;
+    }
+    footer {
+      background-color: #343a40;
+      color: white;
+      padding: 15px 0;
+      text-align: center;
+      margin-top: 60px;
+      font-size: 0.9rem;
+    }
+    .error-message {
+      color: #dc3545;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      display: none;
+    }
+    .loading-spinner {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">TuitionConnect</a>
+    <div class="d-flex">
+      <button class="btn btn-outline-secondary me-2 dark-toggle" onclick="toggleDarkMode()"><i class="fas fa-moon"></i></button>
+      <a href="Login.html" class="btn btn-outline-primary me-2">Login</a>
+      <a href="studentregister.html" class="btn btn-primary">Sign Up</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5 text-center">
+      <div class="card shadow">
+        <div class="card-body">
+          <h2 class="mb-3"><i class="fas fa-user-graduate me-2"></i>Student Registration</h2>
+          <div id="success-message" class="alert alert-success d-none">
+            <i class="fas fa-check-circle me-2"></i>Registration successful!
+            <div class="mt-3">
+              <a href="index.html" class="btn btn-primary">
+                <i class="fas fa-home me-2"></i>Go to Dashboard
+              </a>
+            </div>
+          </div>
+          <div id="error-alert" class="alert alert-danger d-none">
+            <i class="fas fa-exclamation-circle me-2"></i><span id="error-message">An error occurred</span>
+          </div>
+          <form id="student-register-form">
+            <div class="mb-3">
+              <input type="text" class="form-control" id="full-name" placeholder="Full Name" required>
+              <div class="error-message" id="full-name-error">Please enter your full name</div>
+            </div>
+            <div class="mb-3">
+              <input type="email" class="form-control" id="email" placeholder="Email Address" required>
+              <div class="error-message" id="email-error">Please enter a valid email address</div>
+            </div>
+            <div class="mb-3">
+              <input type="tel" class="form-control" id="phone" placeholder="Phone Number" required>
+              <div class="error-message" id="phone-error">Please enter a valid phone number</div>
+            </div>
+            <div class="mb-3">
+              <select class="form-select" id="education-level" required>
+                <option value="">Select your education level</option>
+                <option value="school">School</option>
+                <option value="college">College/University</option>
+                <option value="professional">Professional Development</option>
+              </select>
+              <div class="error-message" id="education-level-error">Please select your education level</div>
+            </div>
+            <div class="mb-3">
+              <input type="password" class="form-control" id="password" placeholder="Create Password" required>
+              <div class="error-message" id="password-error">Password must be at least 6 characters</div>
+            </div>
+            <div class="mb-3">
+              <input type="password" class="form-control" id="confirm-password" placeholder="Confirm Password" required>
+              <div class="error-message" id="confirm-password-error">Passwords do not match</div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 position-relative">
+              <span>Register as Student</span>
+              <span class="loading-spinner spinner-border spinner-border-sm position-absolute" style="right: 10px;"></span>
+            </button>
+            <div class="text-center mt-2">
+              <small>Already registered? <a href="Login.html">Login here</a></small>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  © 2025 TuitionConnect. All rights reserved.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('student-register-form');
+    const successMessage = document.getElementById('success-message');
+    const errorAlert = document.getElementById('error-alert');
+    const errorMessage = document.getElementById('error-message');
+    const loadingSpinner = document.querySelector('.loading-spinner');
+
+    // Form validation functions
+    const showError = (fieldId, message) => {
+      const errorElement = document.getElementById(`${fieldId}-error`);
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+      document.getElementById(fieldId).classList.add('is-invalid');
+    };
+
+    const clearErrors = () => {
+      document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.form-control, .form-select').forEach(el => el.classList.remove('is-invalid'));
+    };
+
+    // Generate a random ID between 1 and 10000
+    const generateRandomId = () => Math.floor(Math.random() * 10000) + 1;
+
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+      clearErrors();
+      
+      // Get form values
+      const fullName = document.getElementById('full-name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const educationLevel = document.getElementById('education-level').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      
+      // Validate form
+      let isValid = true;
+      
+      if (!fullName) {
+        showError('full-name', 'Please enter your full name');
+        isValid = false;
+      }
+      
+      if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+        showError('email', 'Please enter a valid email address');
+        isValid = false;
+      }
+      
+      if (!phone) {
+        showError('phone', 'Please enter a valid phone number');
+        isValid = false;
+      }
+      
+      if (!educationLevel) {
+        showError('education-level', 'Please select your education level');
+        isValid = false;
+      }
+      
+      if (!password || password.length < 6) {
+        showError('password', 'Password must be at least 6 characters');
+        isValid = false;
+      }
+      
+      if (password !== confirmPassword) {
+        showError('confirm-password', 'Passwords do not match');
+        isValid = false;
+      }
+      
+      if (isValid) {
+        // Show loading spinner
+        loadingSpinner.style.display = 'inline-block';
+        
+        // Create user object
+        const userData = {
+          id: generateRandomId(),
+          fullName: fullName,
+          email: email,
+          phone: phone,
+          bio: `${educationLevel} student`,
+          password: password,
+          profilePicture: "default.jpg"
+        };
+        
+        // Send POST request to backend
+        fetch('http://localhost:8080/api/users/students/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(userData)
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Navigate to help.html after successful registration
+          window.location.href = 'Login.html';
+        })
+        .catch(error => {
+          // Show error message
+          errorMessage.textContent = `Registration failed: ${error.message}`;
+          errorAlert.classList.remove('d-none');
+        })
+        .finally(() => {
+          // Hide loading spinner
+          loadingSpinner.style.display = 'none';
+        });
+      }
+    });
+  });
+
+  // Dark mode toggle function
+  function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const darkToggle = document.querySelector('.dark-toggle i');
+    if (document.body.classList.contains('dark-mode')) {
+      darkToggle.classList.remove('fa-moon');
+      darkToggle.classList.add('fa-sun');
+      localStorage.setItem('darkMode', 'enabled');
+    } else {
+      darkToggle.classList.remove('fa-sun');
+      darkToggle.classList.add('fa-moon');
+      localStorage.setItem('darkMode', 'disabled');
+    }
+  }
+
+  // Check for saved dark mode preference
+  document.addEventListener('DOMContentLoaded', function() {
+    if (localStorage.getItem('darkMode') === 'enabled') {
+      document.body.classList.add('dark-mode');
+      const darkToggle = document.querySelector('.dark-toggle i');
+      darkToggle.classList.remove('fa-moon');
+      darkToggle.classList.add('fa-sun');
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TuitionConnect - Subjects & Tutors</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(to right, #e3f2fd, #fce4ec);
+      font-family: 'Segoe UI', sans-serif;
+      transition: background 0.3s ease;
+    }
+
+    body.dark-mode {
+      background: linear-gradient(to right, #1a1a1a, #2d1b21);
+    }
+
+    .dark-mode .nav-link {
+      color: #ced4da;
+    }
+
+    .dark-mode .nav-link.active {
+      color: #fff;
+      background-color: #495057;
+    }
+
+    .dark-mode .card {
+      background-color: #2d2d2d;
+      color: #e9ecef;
+    }
+
+    footer {
+      background-color: #343a40;
+      color: white;
+      padding: 15px 0;
+      text-align: center;
+      margin-top: 60px;
+      font-size: 0.9rem;
+    }
+
+    /* Profile Dropdown Styles */
+    .profile-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .profile-pic {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      object-fit: cover;
+      border: 2px solid var(--primary, #0d6efd);
+      transition: all 0.3s ease;
+      background-color: #f8f9fa;
+    }
+
+    body.dark-mode .profile-pic {
+      background-color: #2d3238;
+    }
+
+    .profile-pic:hover {
+      border-color: var(--accent, #4cc9f0);
+      transform: scale(1.05);
+    }
+
+    .profile-dropdown-menu {
+      position: absolute;
+      top: 120%;
+      right: 0;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      min-width: 240px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+
+    .profile-dropdown-menu.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    body.dark-mode .profile-dropdown-menu {
+      background: #2d2d2d;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .profile-header-item {
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    body.dark-mode .profile-header-item {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .profile-header-pic {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .profile-header-info {
+      flex: 1;
+    }
+
+    .profile-header-info .name {
+      font-weight: 600;
+      color: #000;
+      margin-bottom: 2px;
+    }
+
+    .profile-header-info .email {
+      font-size: 0.85rem;
+      color: #6c757d;
+    }
+
+    body.dark-mode .profile-header-info .name {
+      color: #fff;
+    }
+
+    body.dark-mode .profile-header-info .email {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .dropdown-item {
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #000;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    body.dark-mode .dropdown-item {
+      color: #fff;
+    }
+
+    .dropdown-item:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    body.dark-mode .dropdown-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Loading indicator */
+    .loading-container {
+      text-align: center;
+      padding: 30px;
+    }
+
+    .spinner-border {
+      width: 3rem;
+      height: 3rem;
+    }
+
+    /* Error message */
+    .error-message {
+      text-align: center;
+      padding: 20px;
+      background-color: #f8d7da;
+      color: #721c24;
+      border-radius: 5px;
+      margin: 20px 0;
+    }
+
+    body.dark-mode .error-message {
+      background-color: #2c1215;
+      color: #f8d7da;
+    }
+
+    /* Tutor Icons */
+    .subject-icon-container {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      margin-right: 15px;
+    }
+
+    .tutor-badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 15px;
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+
+    .star {
+      font-size: 1.5rem;
+      color: #ccc;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .star.selected,
+    .star.hovered {
+      color: #ffc107;
+      /* yellow star */
+    }
+
+    .review-stars {
+      color: #ffc107;
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">TuitionConnect</a>
+      <div class="d-flex align-items-center">
+        <div id="authButtons">
+          <!-- Will be populated by JavaScript -->
+        </div>
+        <button class="btn btn-outline-secondary ms-2 dark-toggle" onclick="toggleDarkMode()">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container my-5">
+    <h2 class="text-center mb-4"><i class="fas fa-book me-2"></i>Subjects & Tutors</h2>
+
+    <ul class="nav nav-tabs mb-3">
+      <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="tab" href="#subjects-tab">Subjects</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#tutors-tab">Tutors</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#review-tab">Review</a>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- Subjects -->
+      <div class="tab-pane fade show active" id="subjects-tab">
+        <div class="row" id="subjects-list">
+          <!-- Loading indicator for subjects -->
+          <div class="col-12 loading-container" id="subjects-loading">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading subjects...</p>
+          </div>
+
+          <!-- Error message for subjects -->
+          <div class="col-12 error-message d-none" id="subjects-error">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span>Failed to load subjects. Please try again later.</span>
+          </div>
+
+          <!-- Subject cards will be inserted here by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Tutors -->
+      <div class="tab-pane fade" id="tutors-tab">
+        <div class="row" id="tutors-list">
+          <!-- Loading indicator for tutors -->
+          <div class="col-12 loading-container" id="tutors-loading">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading tutors...</p>
+          </div>
+
+          <!-- Error message for tutors -->
+          <div class="col-12 error-message d-none" id="tutors-error">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span>Failed to load tutors. Please try again later.</span>
+          </div>
+
+          <!-- Tutor cards will be inserted here by JavaScript -->
+        </div>
+      </div>
+
+      <!-- reviews -->
+      <div class="tab-pane fade" id="review-tab">
+        <div class="row">
+          <!-- Review Form Column -->
+          <div class="col-md-6">
+            <div class="card shadow p-4">
+              <form id="review-form">
+                <div class="mb-3">
+                  <label for="tutor-select" class="form-label">Select Tutor:</label>
+                  <select class="form-select" id="tutor-select" required>
+                    <option value="">-- Choose a Tutor --</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="review-text" class="form-label">Your Review:</label>
+                  <textarea class="form-control" id="review-text" rows="4" placeholder="Write your review here..."
+                    required></textarea>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Rating:</label>
+                  <div class="rating" id="rating-stars">
+                    <span class="star" data-value="1">★</span>
+                    <span class="star" data-value="2">★</span>
+                    <span class="star" data-value="3">★</span>
+                    <span class="star" data-value="4">★</span>
+                    <span class="star" data-value="5">★</span>
+                  </div>
+                  <input type="hidden" id="rating-value" name="rating" value="0" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Submit Review</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Review List Column -->
+          <div class="col-md-6">
+            <div class="card shadow p-4">
+              <h5 class="mb-3">Latest Reviews</h5>
+              <div id="review-list" style="max-height: 400px; overflow-y: auto;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+
+  <footer>
+    © 2025 TuitionConnect. All rights reserved.
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Load tutor data
+    fetch('http://localhost:8080/api/tutors')
+      .then(response => response.json())
+      .then(data => {
+        const tutorSelect = document.getElementById('tutor-select');
+        data.forEach(tutor => {
+          const option = document.createElement('option');
+          option.value = tutor.id;
+          option.textContent = tutor.fullName;
+          tutorSelect.appendChild(option);
+        });
+      })
+      .catch(error => console.error('Error loading tutors:', error));
+
+    // Handle star rating
+    const stars = document.querySelectorAll('#rating-stars .star');
+    stars.forEach(star => {
+      star.addEventListener('click', () => {
+        const rating = star.getAttribute('data-value');
+        document.getElementById('rating-value').value = rating;
+
+        // Highlight selected stars
+        stars.forEach(s => s.classList.remove('text-warning'));
+        for (let i = 0; i < rating; i++) {
+          stars[i].classList.add('text-warning');
+        }
+      });
+    });
+
+    // Handle review form submission
+    document.getElementById('review-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const reviewData = {
+        tutorId: parseInt(document.getElementById('tutor-select').value),
+        reviewText: document.getElementById('review-text').value,
+        rating: parseInt(document.getElementById('rating-value').value),
+        date: new Date().toISOString(), // Current timestamp
+        userId: 1, // Replace with dynamic user ID if available
+        tutorName: document.getElementById('tutor-select').selectedOptions[0].text
+      };
+
+      fetch('http://localhost:8080/api/reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(reviewData)
+      })
+        .then(response => {
+          if (!response.ok) throw new Error("Review submission failed");
+          return response.text(); // Or .json() if the API returns JSON
+        })
+        .then(message => {
+          alert("Review submitted successfully!");
+          document.getElementById('review-form').reset();
+          document.getElementById('rating-value').value = 0;
+          stars.forEach(s => s.classList.remove('text-warning'));
+        })
+        .catch(error => {
+          console.error('Error submitting review:', error);
+          alert("Something went wrong while submitting the review.");
+        });
+    });
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+      fetch("http://localhost:8080/api/reviews/file")
+        .then((res) => res.json())
+        .then((data) => {
+          const container = document.getElementById("review-list");
+          container.innerHTML = "";
+
+          if (data.length === 0) {
+            container.innerHTML = "<p>No reviews yet.</p>";
+            return;
+          }
+
+          data.reverse().forEach((review) => {
+            const reviewHTML = `
+          <div class="border-bottom mb-3 pb-2">
+            <strong>${review.tutorName}</strong>
+            <div>Rating: ${"★".repeat(review.rating)}${"☆".repeat(5 - review.rating)}</div>
+            <small class="text-muted">${new Date(review.date).toLocaleString()}</small>
+            <p class="mb-0">${review.reviewText}</p>
+          </div>
+        `;
+            container.innerHTML += reviewHTML;
+          });
+        })
+        .catch((err) => {
+          console.error("Failed to fetch reviews:", err);
+          document.getElementById("review-list").innerHTML = "<p>Error loading reviews.</p>";
+        });
+    });
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const stars = document.querySelectorAll("#rating-stars .star");
+      const ratingInput = document.getElementById("rating-value");
+
+      stars.forEach((star, index) => {
+        // Handle hover effect
+        star.addEventListener("mouseenter", () => {
+          resetStars();
+          highlightStars(index);
+        });
+
+        star.addEventListener("mouseleave", () => {
+          setStarsFromInput();
+        });
+
+        // Handle click to set rating
+        star.addEventListener("click", () => {
+          const selectedRating = star.getAttribute("data-value");
+          ratingInput.value = selectedRating;
+          setStarsFromInput();
+        });
+      });
+
+      function highlightStars(index) {
+        for (let i = 0; i <= index; i++) {
+          stars[i].classList.add("hovered");
+        }
+      }
+
+      function resetStars() {
+        stars.forEach(star => {
+          star.classList.remove("hovered", "selected");
+        });
+      }
+
+      function setStarsFromInput() {
+        const rating = parseInt(ratingInput.value);
+        resetStars();
+        for (let i = 0; i < rating; i++) {
+          stars[i].classList.add("selected");
+        }
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      fetch("http://localhost:8080/api/reviews/file")
+        .then(response => response.json())
+        .then(reviews => {
+          const reviewList = document.getElementById("review-list");
+          reviewList.innerHTML = ""; // Clear previous content
+
+          reviews.forEach(review => {
+            const reviewDiv = document.createElement("div");
+            reviewDiv.classList.add("mb-3", "p-2", "border", "rounded");
+
+            const starsHtml = getStarsHTML(review.rating);
+
+            reviewDiv.innerHTML = `
+          <strong>${review.tutorName}</strong><br>
+          <div class="review-stars">${starsHtml}</div>
+          <p class="mb-1">${review.reviewText}</p>
+          <small class="text-muted">${new Date(review.date).toLocaleString()}</small>
+        `;
+
+            reviewList.appendChild(reviewDiv);
+          });
+        })
+        .catch(error => {
+          console.error("Failed to fetch reviews:", error);
+        });
+
+      function getStarsHTML(rating) {
+        let stars = "";
+        for (let i = 1; i <= 5; i++) {
+          stars += i <= rating ? "★" : "☆";
+        }
+        return stars;
+      }
+    });
+  </script>
+  <script>
+
+    // ============= Authentication Logic =============
+
+    // Get user data from localStorage
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const userRole = localStorage.getItem('role');
+
+    // Update auth buttons based on login status
+    function updateAuthButtons() {
+      const authButtonsDiv = document.getElementById('authButtons');
+
+      if (user) {
+        // User is logged in, show profile dropdown
+        authButtonsDiv.innerHTML = `
+        <div class="profile-dropdown">
+          <img src="${user.profilePicture || 'default_avatar.jpg'}" alt="Profile" class="profile-pic" id="profileDropdownToggle">
+          <div class="profile-dropdown-menu" id="profileDropdownMenu">
+            <div class="profile-header-item">
+              <img src="${user.profilePicture || 'default_avatar.jpg'}" alt="Profile" class="profile-header-pic">
+              <div class="profile-header-info">
+                <div class="name">${user.fullName}</div>
+                <div class="email">${user.email}</div>
+              </div>
+            </div>
+            <a href="profile.html" class="dropdown-item">
+              <i class="fas fa-user-circle"></i>
+              My Profile
+            </a>
+            ${userRole === 'tutor' ?
+            `<a href="tutormanagement.html" class="dropdown-item">
+                <i class="fas fa-chalkboard-teacher"></i>
+                Tutor Dashboard
+              </a>` :
+            `<a href="bookings.html" class="dropdown-item">
+                <i class="fas fa-calendar-check"></i>
+                My Bookings
+              </a>`
+          }
+            <a href="#" class="dropdown-item" onclick="logout()">
+              <i class="fas fa-sign-out-alt"></i>
+              Logout
+            </a>
+          </div>
+        </div>
+      `;
+
+        // Set up dropdown toggle
+        const profileDropdownToggle = document.getElementById('profileDropdownToggle');
+        const profileDropdownMenu = document.getElementById('profileDropdownMenu');
+
+        profileDropdownToggle.addEventListener('click', function () {
+          profileDropdownMenu.classList.toggle('show');
+        });
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', function (event) {
+          if (!event.target.matches('.profile-pic') && !profileDropdownMenu.contains(event.target)) {
+            profileDropdownMenu.classList.remove('show');
+          }
+        });
+      } else {
+        // User is not logged in, show login/register buttons
+        authButtonsDiv.innerHTML = `
+        <a href="Login.html" class="btn btn-outline-primary me-2">Login</a>
+        <a href="studentregister.html" class="btn btn-primary">Sign Up</a>
+      `;
+      }
+    }
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem('user');
+      localStorage.removeItem('role');
+      window.location.href = 'index.html';
+    }
+
+    // ============= Dark Mode Logic =============
+
+    // Toggle dark mode
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      const darkToggle = document.querySelector('.dark-toggle i');
+      if (document.body.classList.contains('dark-mode')) {
+        darkToggle.classList.remove('fa-moon');
+        darkToggle.classList.add('fa-sun');
+        localStorage.setItem('darkMode', 'enabled');
+      } else {
+        darkToggle.classList.remove('fa-sun');
+        darkToggle.classList.add('fa-moon');
+        localStorage.setItem('darkMode', 'disabled');
+      }
+    }
+
+    // ============= Subjects Logic =============
+
+    // Subject icons mapping
+    const subjectIcons = {
+      'OOP': 'fas fa-code',
+      'DSA': 'fas fa-project-diagram',
+      'DM': 'fas fa-calculator',
+      'TW': 'fas fa-pen-fancy',
+      'default': 'fas fa-book'
+    };
+
+    // Subject colors mapping
+    const subjectColors = {
+      'OOP': 'primary',
+      'DSA': 'success',
+      'DM': 'info',
+      'TW': 'warning',
+      'default': 'secondary'
+    };
+
+    // Fetch subjects from API
+    async function fetchSubjects() {
+      const subjectsList = document.getElementById('subjects-list');
+      const subjectsLoading = document.getElementById('subjects-loading');
+      const subjectsError = document.getElementById('subjects-error');
+
+      try {
+        const response = await fetch('http://localhost:8080/api/subjects');
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const subjects = await response.json();
+
+        // Hide loading indicator
+        subjectsLoading.classList.add('d-none');
+
+        // Check if we have subjects
+        if (subjects.length === 0) {
+          subjectsList.innerHTML = '<div class="col-12 text-center">No subjects available at the moment.</div>';
+          return;
+        }
+
+        // Generate subject cards
+        let subjectsHTML = '';
+
+        subjects.forEach(subject => {
+          const icon = subjectIcons[subject.code] || subjectIcons.default;
+
+          subjectsHTML += `
+          <div class="col-md-3 mb-3">
+            <div class="card shadow p-3 h-100">
+              <div class="card-body">
+                <h5 class="card-title"><i class="${icon} me-2"></i>${subject.code}</h5>
+                <p class="card-text">${subject.description}</p>
+                <a href="Search.html?subject=${subject.code}" class="btn btn-primary btn-sm">Find ${subject.code} Tutor</a>
+              </div>
+            </div>
+          </div>
+        `;
+        });
+
+        // Add subject cards to the page
+        subjectsList.innerHTML = subjectsHTML;
+
+      } catch (error) {
+        console.error('Error fetching subjects:', error);
+        subjectsLoading.classList.add('d-none');
+        subjectsError.classList.remove('d-none');
+      }
+    }
+
+    // ============= Tutors Logic =============
+
+    // Fetch tutors from API
+    async function fetchTutors() {
+      const tutorsList = document.getElementById('tutors-list');
+      const tutorsLoading = document.getElementById('tutors-loading');
+      const tutorsError = document.getElementById('tutors-error');
+
+      try {
+        const response = await fetch('http://localhost:8080/api/tutors');
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const tutors = await response.json();
+
+        // Hide loading indicator
+        tutorsLoading.classList.add('d-none');
+
+        // Check if we have tutors
+        if (tutors.length === 0) {
+          tutorsList.innerHTML = '<div class="col-12 text-center">No tutors available at the moment.</div>';
+          return;
+        }
+
+        // Filter active tutors
+        const activeTutors = tutors.filter(tutor => tutor.status === 'pending');
+
+        if (activeTutors.length === 0) {
+          tutorsList.innerHTML = '<div class="col-12 text-center">No active tutors available at the moment.</div>';
+          return;
+        }
+
+        // Generate tutor cards
+        let tutorsHTML = '';
+
+        activeTutors.forEach(tutor => {
+          // Get first subject for the badge
+          const primarySubject = tutor.subjects && tutor.subjects.length > 0 ? tutor.subjects[0] : null;
+          const subjectCode = primarySubject && primarySubject.includes('(') ?
+            primarySubject.match(/\(([^)]+)\)/)[1] : primarySubject;
+
+          const badgeColor = primarySubject ? subjectColors[subjectCode] || subjectColors.default : subjectColors.default;
+          const icon = primarySubject ? subjectIcons[subjectCode] || subjectIcons.default : subjectIcons.default;
+
+          tutorsHTML += `
+          <div class="col-md-6 mb-4">
+            <div class="card shadow p-3">
+              <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                  <div class="subject-icon-container bg-${badgeColor} bg-opacity-25">
+                    <i class="${icon} fa-2x text-${badgeColor}"></i>
+                  </div>
+                  <div>
+                    <h5 class="card-title mb-1">${tutor.fullName}</h5>
+                    ${primarySubject ?
+              `<span class="tutor-badge bg-${badgeColor}">${primarySubject} Specialist</span>` :
+              ''
+            }
+                  </div>
+                </div>
+                <p class="card-text">
+                  ${primarySubject ?
+              `<i class="${icon} me-2"></i>${primarySubject} Expert<br>` :
+              ''
+            }
+                  <i class="fas fa-star text-warning me-2"></i>${tutor.rating} ${tutor.rating === 5 ? '(New Tutor)' : `(${Math.floor(Math.random() * 100) + 10}+ reviews)`}<br>
+                  <i class="fas fa-clock me-2"></i>${tutor.experienceYears}+ years of teaching experience
+                </p>
+                <a href="Search.html?tutor=${tutor.id}" class="btn btn-${badgeColor}">Book Sessions</a>
+              </div>
+            </div>
+          </div>
+        `;
+        });
+
+        // Add tutor cards to the page
+        tutorsList.innerHTML = tutorsHTML;
+
+      } catch (error) {
+        console.error('Error fetching tutors:', error);
+        tutorsLoading.classList.add('d-none');
+        tutorsError.classList.remove('d-none');
+      }
+    }
+
+    // ============= Initialization =============
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // Update auth buttons
+      updateAuthButtons();
+
+      // Load dark mode from localStorage
+      if (localStorage.getItem('darkMode') === 'enabled') {
+        document.body.classList.add('dark-mode');
+        const darkToggle = document.querySelector('.dark-toggle i');
+        darkToggle.classList.remove('fa-moon');
+        darkToggle.classList.add('fa-sun');
+      }
+
+      // Fetch data from APIs
+      fetchSubjects();
+      fetchTutors();
+    });
+  </script>
+</body>
+
+</html>

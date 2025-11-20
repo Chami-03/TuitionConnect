@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TuitionConnect - FAQ</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(to right, #e3f2fd, #fce4ec);
+      font-family: 'Segoe UI', sans-serif;
+      transition: background 0.3s ease;
+    }
+    body.dark-mode {
+      background: linear-gradient(to right, #1a1a1a, #2d1b21);
+    }
+    .dark-mode .accordion-button {
+      background-color: #2d2d2d;
+      color: #e9ecef;
+    }
+    .dark-mode .accordion-button:not(.collapsed) {
+      background-color: #343a40;
+      color: #fff;
+    }
+    .dark-mode .accordion-body {
+      background-color: #2d2d2d;
+      color: #e9ecef;
+    }
+    footer {
+      background-color: #343a40;
+      color: white;
+      padding: 15px 0;
+      text-align: center;
+      margin-top: 60px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">TuitionConnect</a>
+    <div class="d-flex">
+      <button class="btn btn-outline-secondary me-2 dark-toggle" onclick="toggleDarkMode()"><i class="fas fa-moon"></i></button>
+      <a href="Login.html" class="btn btn-outline-primary me-2">Login</a>
+      <a href="studentregister.html" class="btn btn-primary">Sign Up</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container my-5">
+  <h2 class="text-center mb-4"><i class="fas fa-question-circle me-2"></i>Frequently Asked Questions</h2>
+  <p class="text-center mb-4">Find answers to common questions about our tutoring platform</p>
+
+  <div class="accordion" id="faqAccordion">
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+          How do I register as a tutor?
+        </button>
+      </h2>
+      <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+        <div class="accordion-body">
+          <p>To register as a tutor:</p>
+          <ul>
+            <li>Visit our "Tutor Register" page</li>
+            <li>Complete the application form with your details</li>
+            <li>Upload required documents (qualifications, ID, etc.)</li>
+            <li>Select the subjects and levels you want to teach</li>
+            <li>Set your availability and hourly rate</li>
+            <li>Submit for verification</li>
+          </ul>
+          <p>Our team typically reviews applications within 2-3 business days.</p>
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+          How do students find tutors?
+        </button>
+      </h2>
+      <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+        <div class="accordion-body">
+          <p>Students can easily find tutors through our platform:</p>
+          <ul>
+            <li><strong>Search by subject</strong> - Filter tutors by specific subjects or topics</li>
+            <li><strong>Location-based</strong> - Find tutors nearby or available for online sessions</li>
+            <li><strong>Ratings & reviews</strong> - See feedback from other students</li>
+            <li><strong>Availability</strong> - Filter by time slots that work for them</li>
+          </ul>
+          <p>Students can view tutor profiles, qualifications, and teaching styles before booking.</p>
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+          Is there any fee to join TuitionConnect?
+        </button>
+      </h2>
+      <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+        <div class="accordion-body">
+          <p>Our pricing structure is transparent:</p>
+          <ul>
+            <li><strong>For students:</strong> No signup or membership fees - you only pay for the sessions you book</li>
+            <li><strong>For tutors:</strong> No upfront costs - we take a small commission (15-20%) from each completed session</li>
+          </ul>
+          <p>Payment processing fees may apply depending on your payment method.</p>
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+          Can I choose the subjects I want to teach?
+        </button>
+      </h2>
+      <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+        <div class="accordion-body">
+          <p>Absolutely! You have full control over:</p>
+          <ul>
+            <li><strong>Subjects:</strong> Select from our extensive list of academic subjects</li>
+            <li><strong>Levels:</strong> Choose the grade levels you're comfortable teaching (elementary to university)</li>
+            <li><strong>Specializations:</strong> Highlight any specialized areas of expertise</li>
+          </ul>
+          <p>You can update your subject preferences anytime in your tutor dashboard.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center mt-4">
+    <h5>Still have questions?</h5>
+    <p>Our support team is available to help you</p>
+    <a href="Contact.html" class="btn btn-primary me-2">Contact Support</a>
+    <a href="tel:+94773790835" class="btn btn-outline-primary">Call Now</a>
+  </div>
+</div>
+
+<footer>
+  © 2025 TuitionConnect. All rights reserved.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const navbar = document.querySelector('.navbar');
+    if (document.body.classList.contains('dark-mode')) {
+      document.body.style.background = 'linear-gradient(to right, #1a1a1a, #2d1b21)';
+      navbar.classList.remove('navbar-light', 'bg-light');
+      navbar.classList.add('navbar-dark', 'bg-dark');
+      document.querySelector('.dark-toggle').innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+      document.body.style.background = 'linear-gradient(to right, #e3f2fd, #fce4ec)';
+      navbar.classList.remove('navbar-dark', 'bg-dark');
+      navbar.classList.add('navbar-light', 'bg-light');
+      document.querySelector('.dark-toggle').innerHTML = '<i class="fas fa-moon"></i>';
+    }
+    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+  }
+
+  if (localStorage.getItem('darkMode') === 'true') {
+    toggleDarkMode();
+  }
+</script>
+</body>
+</html>

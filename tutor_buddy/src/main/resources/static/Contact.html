@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TuitionConnect - Contact Us</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(to right, #e3f2fd, #fce4ec);
+      font-family: 'Segoe UI', sans-serif;
+      transition: background 0.3s ease;
+    }
+    body.dark-mode {
+      background: linear-gradient(to right, #1a1a1a, #2d1b21);
+    }
+    .dark-mode .card {
+      background-color: #2d2d2d;
+      color: #e9ecef;
+    }
+    footer {
+      background-color: #343a40;
+      color: white;
+      padding: 15px 0;
+      text-align: center;
+      margin-top: 60px;
+      font-size: 0.9rem;
+    }
+
+    /* Profile Dropdown Styles */
+    .profile-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .profile-pic {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      object-fit: cover;
+      border: 2px solid var(--bs-primary);
+      transition: all 0.3s ease;
+      background-color: #f8f9fa;
+    }
+
+    body.dark-mode .profile-pic {
+      background-color: #2d3238;
+    }
+
+    .profile-pic:hover {
+      border-color: #4cc9f0;
+      transform: scale(1.05);
+    }
+
+    .profile-dropdown-menu {
+      position: absolute;
+      top: 120%;
+      right: 0;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      min-width: 240px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      padding: 8px 0;
+    }
+
+    .profile-dropdown-menu.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    body.dark-mode .profile-dropdown-menu {
+      background: #2d2d2d;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .profile-header-item {
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    body.dark-mode .profile-header-item {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .profile-header-pic {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .profile-header-info {
+      flex: 1;
+    }
+
+    .profile-header-info .name {
+      font-weight: 600;
+      color: #000;
+      margin-bottom: 2px;
+    }
+
+    .profile-header-info .email {
+      font-size: 0.85rem;
+      color: #6c757d;
+    }
+
+    body.dark-mode .profile-header-info .name {
+      color: #fff;
+    }
+
+    body.dark-mode .profile-header-info .email {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .dropdown-item {
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #000;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    body.dark-mode .dropdown-item {
+      color: #fff;
+    }
+
+    .dropdown-item:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    body.dark-mode .dropdown-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: rgba(0, 0, 0, 0.1);
+      margin: 8px 0;
+    }
+
+    body.dark-mode .dropdown-divider {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">TuitionConnect</a>
+    <div class="d-flex align-items-center" id="authButtons">
+      <!-- Auth buttons will be dynamically populated -->
+    </div>
+  </div>
+</nav>
+
+<div class="container my-5">
+  <h2 class="text-center mb-4"><i class="fas fa-headset me-2"></i>Contact Us</h2>
+
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow p-4 mb-4">
+        <h5><i class="fas fa-shield-alt me-2"></i>Safety First</h5>
+        <p>We'll never ask for sensitive info like passwords or credit card details via email or chat.</p>
+        <a href="Terms of Service.html" class="btn btn-outline-primary btn-sm">Learn More</a>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <div class="card shadow p-3 text-center">
+            <h5><i class="fas fa-comment me-2"></i>Chat with Us</h5>
+            <p>Get quick answers via live chat with our support team.</p>
+            <button class="btn btn-primary btn-sm">Start Chat</button>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="card shadow p-3 text-center">
+            <h5><i class="fas fa-phone me-2"></i>Call Us</h5>
+            <p>Speak directly with our team for urgent matters at 0773790835.</p>
+            <a href="tel:+94773790835" class="btn btn-primary btn-sm">Call Now</a>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="card shadow p-3 text-center">
+            <h5><i class="fas fa-envelope me-2"></i>Email Us</h5>
+            <p>Send us a message, and we'll reply within 24 hours at <a href="mailto:tutorbuddy110@gmail.com">tutorbuddy110@gmail.com</a>.</p>
+            <a href="mailto:tutorbuddy110@gmail.com" class="btn btn-primary btn-sm">Send Email</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  © 2025 TuitionConnect. All rights reserved.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function updateAuthButtons() {
+    const authButtons = document.getElementById('authButtons');
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (user) {
+      // Get user details including profile picture
+      const users = JSON.parse(localStorage.getItem(user.role === 'tutor' ? 'tutors' : 'students') || '[]');
+      const userDetails = users.find(u => u.email === user.email);
+      const profilePic = userDetails?.profilePicture || 'https://via.placeholder.com/150';
+
+      // User is logged in
+      authButtons.innerHTML = `
+        <div class="d-flex align-items-center">
+          <div class="profile-dropdown">
+            <img src="${profilePic}" alt="Profile" class="profile-pic" id="profileDropdownBtn">
+            <div class="profile-dropdown-menu" id="profileDropdownMenu">
+              <div class="profile-header-item">
+                <img src="${profilePic}" alt="Profile" class="profile-header-pic">
+                <div class="profile-header-info">
+                  <div class="name">${user.name}</div>
+                  <div class="email">${user.email}</div>
+                </div>
+              </div>
+              <div class="dropdown-divider"></div>
+              <a href="viewprofile.html" class="dropdown-item">
+                <i class="fas fa-id-card"></i>
+                View Profile
+              </a>
+              <a onclick="logout()" class="dropdown-item">
+                <i class="fas fa-sign-out-alt"></i>
+                Sign Out
+              </a>
+            </div>
+          </div>
+          <button class="btn btn-outline-secondary ms-2 dark-toggle" onclick="toggleDarkMode()">
+            <i class="fas fa-moon"></i>
+          </button>
+        </div>
+      `;
+
+      // Add click event listener for profile dropdown
+      const profileBtn = document.getElementById('profileDropdownBtn');
+      const dropdownMenu = document.getElementById('profileDropdownMenu');
+      
+      profileBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+        dropdownMenu.classList.toggle('show');
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.profile-dropdown')) {
+          dropdownMenu.style.display = 'none';
+          dropdownMenu.classList.remove('show');
+        }
+      });
+    } else {
+      // User is not logged in
+      authButtons.innerHTML = `
+        <a href="Login.html" class="btn btn-outline-primary me-2">Login</a>
+        <a href="studentregister.html" class="btn btn-primary">Sign Up</a>
+        <button class="btn btn-outline-secondary ms-2 dark-toggle" onclick="toggleDarkMode()">
+          <i class="fas fa-moon"></i>
+        </button>
+      `;
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+  }
+
+  // Initialize
+  document.addEventListener('DOMContentLoaded', () => {
+    // Check dark mode preference
+    if (localStorage.getItem('darkMode') === 'true') {
+      toggleDarkMode();
+    }
+    
+    // Update auth buttons
+    updateAuthButtons();
+  });
+
+  function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const navbar = document.querySelector('.navbar');
+    if (document.body.classList.contains('dark-mode')) {
+      document.body.style.background = 'linear-gradient(to right, #1a1a1a, #2d1b21)';
+      navbar.classList.remove('navbar-light', 'bg-light');
+      navbar.classList.add('navbar-dark', 'bg-dark');
+      document.querySelector('.dark-toggle').innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+      document.body.style.background = 'linear-gradient(to right, #e3f2fd, #fce4ec)';
+      navbar.classList.remove('navbar-dark', 'bg-dark');
+      navbar.classList.add('navbar-light', 'bg-light');
+      document.querySelector('.dark-toggle').innerHTML = '<i class="fas fa-moon"></i>';
+    }
+    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TuitionConnect - View Bookings</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(to right, #e3f2fd, #fce4ec);
+      font-family: 'Segoe UI', sans-serif;
+      transition: background 0.3s ease;
+    }
+    body.dark-mode {
+      background: linear-gradient(to right, #1a1a1a, #2d1b21);
+    }
+    .card {
+      border: none;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .dark-mode .card {
+      background-color: #2d2d2d;
+      color: #e9ecef;
+    }
+    .booking-card {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: slideIn 0.5s ease forwards;
+    }
+    @keyframes slideIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .badge {
+      font-size: 0.9rem;
+      padding: 0.5rem 1rem;
+    }
+    .tutor-info {
+      border-left: 3px solid #0d6efd;
+      padding-left: 1rem;
+    }
+    .dark-mode .tutor-info {
+      border-left-color: #0dcaf0;
+    }
+    .session-actions {
+      transition: all 0.3s ease;
+    }
+    .session-actions button {
+      transform: scale(1);
+      transition: all 0.2s ease;
+    }
+    .session-actions button:hover {
+      transform: scale(1.05);
+    }
+    .status-badge-upcoming {
+      background: linear-gradient(45deg, #28a745, #20c997);
+    }
+    .status-badge-completed {
+      background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+    }
+    .status-badge-cancelled {
+      background: linear-gradient(45deg, #dc3545, #fd7e14);
+    }
+    .nav-tabs .nav-link {
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    .nav-tabs .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      background: #0d6efd;
+      transition: all 0.3s ease;
+      transform: translateX(-50%);
+    }
+    .nav-tabs .nav-link.active::after {
+      width: 100%;
+    }
+    .dark-mode .nav-tabs .nav-link::after {
+      background: #0dcaf0;
+    }
+    footer {
+      background-color: #343a40;
+      color: white;
+      padding: 15px 0;
+      text-align: center;
+      margin-top: 60px;
+      font-size: 0.9rem;
+    }
+
+    /* Profile Dropdown Styles */
+    .profile-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .profile-pic {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      object-fit: cover;
+      border: 2px solid var(--bs-primary);
+      transition: all 0.3s ease;
+      background-color: #f8f9fa;
+    }
+
+    body.dark-mode .profile-pic {
+      background-color: #2d3238;
+    }
+
+    .profile-pic:hover {
+      border-color: #4cc9f0;
+      transform: scale(1.05);
+    }
+
+    .profile-dropdown-menu {
+      position: absolute;
+      top: 120%;
+      right: 0;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      min-width: 240px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      padding: 8px 0;
+    }
+
+    .profile-dropdown-menu.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    body.dark-mode .profile-dropdown-menu {
+      background: #2d2d2d;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .profile-header-item {
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    body.dark-mode .profile-header-item {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .profile-header-pic {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .profile-header-info {
+      flex: 1;
+    }
+
+    .profile-header-info .name {
+      font-weight: 600;
+      color: #000;
+      margin-bottom: 2px;
+    }
+
+    .profile-header-info .email {
+      font-size: 0.85rem;
+      color: #6c757d;
+    }
+
+    body.dark-mode .profile-header-info .name {
+      color: #fff;
+    }
+
+    body.dark-mode .profile-header-info .email {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .dropdown-item {
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #000;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    body.dark-mode .dropdown-item {
+      color: #fff;
+    }
+
+    .dropdown-item:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    body.dark-mode .dropdown-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: rgba(0, 0, 0, 0.1);
+      margin: 8px 0;
+    }
+
+    body.dark-mode .dropdown-divider {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">TuitionConnect</a>
+    <div class="d-flex align-items-center" id="authButtons">
+      <!-- Auth buttons will be dynamically populated -->
+    </div>
+  </div>
+</nav>
+
+  <div class="container my-5">
+    <h2 class="text-center mb-4"><i class="fas fa-calendar-check me-2"></i>My Bookings</h2>
+    <p class="text-center mb-4">View and manage your upcoming and past tutoring sessions.</p>
+
+    <ul class="nav nav-tabs mb-3">
+      <li class="nav-item">
+        <a class="nav-link active" href="#" onclick="filterBookings('All')">All Bookings</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" onclick="filterBookings('Upcoming')">Upcoming</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" onclick="filterBookings('Completed')">Completed</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" onclick="filterBookings('Cancelled')">Cancelled</a>
+      </li>
+    </ul>
+
+    <div id="bookings-list">
+      <!-- Populated dynamically -->
+    </div>
+
+    <div id="no-bookings" class="text-center d-none">
+      <div class="py-5">
+        <i class="fas fa-calendar-times text-muted fa-4x mb-3"></i>
+        <h4>No Bookings Found</h4>
+        <p class="text-muted">You don't have any bookings in this category.</p>
+        <a href="Search.html" class="btn btn-primary mt-3">
+          <i class="fas fa-search me-2"></i>Book a tutor now
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-light py-4 mt-5">
+    <div class="container text-center">
+      <p class="mb-0 text-muted">© 2025 TuitionConnect. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let bookings = [];
+    let currentFilter = 'All';
+
+    // Add CSS for the status badges
+    const style = document.createElement('style');
+    style.textContent = `
+      .booking-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        animation: fadeIn 0.5s ease forwards;
+        opacity: 0;
+      }
+      
+      .booking-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      .status-badge-upcoming {
+        background-color: #0d6efd;
+        color: white;
+      }
+      
+      .status-badge-completed {
+        background-color: #198754;
+        color: white;
+      }
+      
+      .status-badge-cancelled {
+        background-color: #dc3545;
+        color: white;
+      }
+      
+      .time-slot {
+        cursor: pointer;
+      }
+      
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1050;
+        animation: slideInRight 0.5s ease;
+      }
+      
+      .notification-content {
+        background: white;
+        color: #198754;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+      }
+      
+      .dark-mode .notification-content {
+        background: #343a40;
+        color: #75b798;
+      }
+      
+      @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      
+      .profile-dropdown {
+        position: relative;
+        display: inline-block;
+      }
+      
+      .profile-pic {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        object-fit: cover;
+      }
+      
+      .profile-dropdown-menu {
+        position: absolute;
+        right: 0;
+        top: 45px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        display: none;
+        min-width: 250px;
+        z-index: 1000;
+      }
+      
+      .profile-header-item {
+        display: flex;
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+      }
+      
+      .profile-header-pic {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        margin-right: 12px;
+        object-fit: cover;
+      }
+      
+      .profile-header-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      
+      .name {
+        font-weight: 600;
+      }
+      
+      .email {
+        font-size: 0.8rem;
+        color: #666;
+      }
+      
+      .dropdown-item {
+        padding: 8px 16px;
+        display: block;
+        color: #333;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      
+      .dropdown-item:hover {
+        background-color: #f8f9fa;
+      }
+      
+      .dropdown-divider {
+        border-top: 1px solid #eee;
+        margin: 0;
+      }
+      
+      .profile-dropdown-menu.show {
+        display: block;
+      }
+      
+      .dark-mode {
+        color: #f8f9fa;
+      }
+      
+      .dark-mode .card {
+        background-color: #2d3748;
+        color: #f8f9fa;
+      }
+      
+      .dark-mode .text-muted {
+        color: #a0aec0 !important;
+      }
+      
+      .dark-mode .bg-light {
+        background-color: #1a202c !important;
+      }
+      
+      .dark-mode .navbar-light {
+        background-color: #1a202c !important;
+      }
+      
+      .dark-mode .navbar-light .navbar-brand {
+        color: #f8f9fa;
+      }
+      
+      .dark-mode .nav-tabs .nav-link {
+        color: #a0aec0;
+      }
+      
+      .dark-mode .nav-tabs .nav-link.active {
+        background-color: #2d3748;
+        color: #f8f9fa;
+        border-color: #4a5568 #4a5568 #2d3748;
+      }
+    `;
+    document.head.appendChild(style);
+
+    function updateAuthButtons() {
+      const authButtons = document.getElementById('authButtons');
+      const user = JSON.parse(localStorage.getItem('user'));
+
+      if (user) {
+        // Get user details including profile picture
+        const users = JSON.parse(localStorage.getItem(user.role === 'tutor' ? 'tutors' : 'students') || '[]');
+        const userDetails = users.find(u => u.email === user.email);
+        const profilePic = userDetails?.profilePicture || 'https://via.placeholder.com/150';
+
+        // User is logged in
+        authButtons.innerHTML = `
+          <div class="d-flex align-items-center">
+            <div class="profile-dropdown">
+              <img src="${profilePic}" alt="Profile" class="profile-pic" id="profileDropdownBtn">
+              <div class="profile-dropdown-menu" id="profileDropdownMenu">
+                <div class="profile-header-item">
+                  <img src="${profilePic}" alt="Profile" class="profile-header-pic">
+                  <div class="profile-header-info">
+                    <div class="name">${user.name}</div>
+                    <div class="email">${user.email}</div>
+                  </div>
+                </div>
+                <div class="dropdown-divider"></div>
+                <a href="viewprofile.html" class="dropdown-item">
+                  <i class="fas fa-id-card"></i>
+                  View Profile
+                </a>
+                <a onclick="logout()" class="dropdown-item">
+                  <i class="fas fa-sign-out-alt"></i>
+                  Sign Out
+                </a>
+              </div>
+            </div>
+            <button class="btn btn-outline-secondary ms-2 dark-toggle" onclick="toggleDarkMode()">
+              <i class="fas fa-moon"></i>
+            </button>
+          </div>
+        `;
+
+        // Add click event listener for profile dropdown
+        const profileBtn = document.getElementById('profileDropdownBtn');
+        const dropdownMenu = document.getElementById('profileDropdownMenu');
+        
+        profileBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+          dropdownMenu.classList.toggle('show');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+          if (!e.target.closest('.profile-dropdown')) {
+            dropdownMenu.style.display = 'none';
+            dropdownMenu.classList.remove('show');
+          }
+        });
+      } else {
+        // User is not logged in
+        authButtons.innerHTML = `
+          <a href="Login.html" class="btn btn-outline-primary me-2">Login</a>
+          <a href="studentregister.html" class="btn btn-primary">Sign Up</a>
+          <button class="btn btn-outline-secondary ms-2 dark-toggle" onclick="toggleDarkMode()">
+            <i class="fas fa-moon"></i>
+          </button>
+        `;
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('user');
+      window.location.href = 'index.html';
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      const navbar = document.querySelector('.navbar');
+      if (document.body.classList.contains('dark-mode')) {
+        document.body.style.background = '#1a202c';
+        navbar.classList.remove('navbar-light', 'bg-light');
+        navbar.classList.add('navbar-dark', 'bg-dark');
+        document.querySelector('.dark-toggle').innerHTML = '<i class="fas fa-sun"></i>';
+      } else {
+        document.body.style.background = '';
+        navbar.classList.remove('navbar-dark', 'bg-dark');
+        navbar.classList.add('navbar-light', 'bg-light');
+        document.querySelector('.dark-toggle').innerHTML = '<i class="fas fa-moon"></i>';
+      }
+      localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      toggleDarkMode();
+    }
+
+    function checkNewBooking() {
+      const newBookingData = localStorage.getItem('newBooking');
+      if (newBookingData) {
+        const booking = JSON.parse(newBookingData);
+        bookings.unshift({
+          id: Date.now(),
+          status: 'Upcoming',
+          ...booking
+        });
+        localStorage.removeItem('newBooking');
+        filterBookings(currentFilter);
+        showNotification('New booking added successfully!');
+      }
+    }
+
+    function showNotification(message, type = 'success') {
+      const notification = document.createElement('div');
+      notification.className = 'notification';
+      notification.innerHTML = `
+        <div class="notification-content ${type === 'warning' ? 'bg-warning text-dark' : ''}">
+          <i class="fas ${type === 'warning' ? 'fa-exclamation-triangle' : 'fa-check-circle'} me-2"></i>
+          ${message}
+        </div>
+      `;
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    function filterBookings(category) {
+      currentFilter = category;
+      document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.textContent === category) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+
+      const filteredBookings = category === 'All' ? bookings : bookings.filter(booking => booking.status === category);
+      const bookingsList = document.getElementById('bookings-list');
+      const noBookings = document.getElementById('no-bookings');
+      bookingsList.innerHTML = '';
+
+      if (filteredBookings.length === 0) {
+        noBookings.classList.remove('d-none');
+        return;
+      }
+
+      noBookings.classList.add('d-none');
+      filteredBookings.forEach((booking, index) => {
+        const card = document.createElement('div');
+        card.className = 'card shadow-sm mb-4 booking-card';
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.innerHTML = `
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="mb-0">
+                <i class="fas fa-book-open me-2 text-primary"></i>${booking.subject}
+              </h5>
+              <span class="badge status-badge-${booking.status.toLowerCase()}">${booking.status}</span>
+            </div>
+            
+            <div class="row g-4">
+              <div class="col-md-4">
+                <div class="tutor-info">
+                  <h6 class="mb-2">
+                    <i class="fas fa-user-tie me-2"></i>${booking.tutor}
+                  </h6>
+                  <p class="small mb-2">${booking.specialization}</p>
+                  <div class="d-flex align-items-center mb-2">
+                    <div class="me-2">
+                      <i class="fas fa-star text-warning"></i>
+                      <span>${booking.rating}</span>
+                    </div>
+                    <small class="text-muted">(${booking.reviews} reviews)</small>
+                  </div>
+                  <p class="small mb-0">
+                    <i class="fas fa-clock me-2"></i>${booking.experience} years experience
+                  </p>
+                </div>
+              </div>
+              
+              <div class="col-md-4">
+                <div class="session-details">
+                  <div class="mb-2">
+                    <i class="fas fa-calendar-alt text-success me-2"></i>
+                    <strong>Date:</strong> ${booking.date}
+                  </div>
+                  <div class="mb-2">
+                    <i class="fas fa-clock text-info me-2"></i>
+                    <strong>Time:</strong> ${booking.time}
+                  </div>
+                  <div class="mb-2">
+                    <i class="fas fa-hourglass-half text-warning me-2"></i>
+                    <strong>Duration:</strong> ${booking.duration}
+                  </div>
+                  <div>
+                    <i class="fas fa-dollar-sign text-success me-2"></i>
+                    <strong>Total:</strong> $${booking.total}
+                  </div>
+                  ${booking.specialRequests ? `
+                    <div class="mt-2 pt-2 border-top">
+                      <div class="d-flex">
+                        <i class="fas fa-comment-dots text-primary me-2 mt-1"></i>
+                        <div>
+                          <strong class="d-block">Special Requests:</strong>
+                          <p class="small mb-0">${booking.specialRequests}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+              
+              <div class="col-md-4">
+                <div class="session-actions text-end">
+                  ${booking.status === 'Upcoming' ? `
+                    <button class="btn btn-success btn-sm mb-2 w-100" onclick="joinSession(${booking.id})">
+                      <i class="fas fa-video me-2"></i>Join via Teams
+                    </button>
+                    
+                    <button class="btn btn-outline-danger btn-sm w-100" onclick="cancelBooking(${booking.id})">
+                      <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                  ` : booking.status === 'Completed' ? `
+                    <button class="btn btn-outline-info btn-sm mb-2 w-100" onclick="viewNotes(${booking.id})">
+                      <i class="fas fa-file-alt me-2"></i>View Notes
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm mb-2 w-100" onclick="rateSession(${booking.id})">
+                      <i class="fas fa-star me-2"></i>Rate Session
+                    </button>
+                    <button class="btn btn-primary btn-sm w-100" onclick="bookAgain(${booking.id})">
+                      <i class="fas fa-redo me-2"></i>Book Again
+                    </button>
+                  ` : `
+                    <button class="btn btn-primary btn-sm w-100" onclick="bookAgain(${booking.id})">
+                      <i class="fas fa-redo me-2"></i>Book Again
+                    </button>
+                  `}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        bookingsList.appendChild(card);
+      });
+    }
+
+    async function fetchBookings() {
+      try {
+        // Show loading state
+        const bookingsList = document.getElementById('bookings-list');
+        bookingsList.innerHTML = '<div class="text-center my-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Loading your bookings...</p></div>';
+        
+        // Fetch bookings from API
+        const response = await fetch('http://localhost:8080/api/bookings/all');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch bookings');
+        }
+        
+        const data = await response.json();
+        
+        // Transform API data to our bookings format
+        bookings = data.map(booking => {
+          // Parse date for display
+          let formattedDate = "Not specified";
+          if (booking.sessionDate) {
+            try {
+              let sessionDate = new Date(booking.sessionDate);
+              formattedDate = sessionDate.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              });
+            } catch (e) {
+              console.warn("Invalid date format:", booking.sessionDate);
+            }
+          }
+          
+          // Calculate time range
+          let timeRange = `${booking.startTime || 'Not set'} - ${booking.endTime || 'Not set'}`;
+          
+          // Map API status to UI status
+          let uiStatus = 'Upcoming';
+          if (booking.status.toLowerCase() === 'completed') {
+            uiStatus = 'Completed';
+          } else if (booking.status.toLowerCase() === 'cancelled') {
+            uiStatus = 'Cancelled';
+          }
+          
+          return {
+            id: booking.id,
+            subject: booking.subject || 'Unspecified Subject',
+            tutor: `Tutor #${booking.tutorId}`, // Replace with actual tutor name if available
+            tutorId: booking.tutorId,
+            specialization: booking.subject || 'General Tutoring', // Use subject as specialization if not provided
+            experience: 'N/A', // Add if available from tutor data
+            rating: 4.5, // Placeholder, replace with actual rating if available
+            reviews: 10, // Placeholder, replace with actual count if available
+            date: formattedDate,
+            time: timeRange,
+            duration: `${booking.duration} hour${booking.duration !== 1 ? 's' : ''}`,
+            total: booking.total,
+            status: uiStatus,
+            specialRequests: booking.specialRequests
+          };
+        });
+        
+        // Fetch tutor information to enhance booking display
+        try {
+          const tutorResponse = await fetch('http://localhost:8080/api/tutors');
+          if (tutorResponse.ok) {
+            const tutors = await tutorResponse.json();
+            
+            // Enhance bookings with tutor information
+            bookings = bookings.map(booking => {
+              const tutor = tutors.find(t => t.id === booking.tutorId);
+              if (tutor) {
+                return {
+                  ...booking,
+                  tutor: tutor.fullName || `Tutor #${booking.tutorId}`,
+                  specialization: tutor.subjects ? tutor.subjects.join(', ') : booking.specialization,
+                  experience: tutor.experienceYears || 'N/A',
+                  rating: tutor.rating || 4.5,
+                  reviews: Math.floor((tutor.rating || 4.5) * 20) // Placeholder: estimate number of reviews
+                };
+              }
+              return booking;
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching tutor data:', error);
+          // Continue with bookings without tutor enhancement
+        }
+        
+        // Display the fetched bookings
+        filterBookings(currentFilter);
+        checkNewBooking();
+        
+      } catch (error) {
+        console.error('Error fetching bookings:', error);
+        const bookingsList = document.getElementById('bookings-list');
+        bookingsList.innerHTML = `
+          <div class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            Failed to load bookings. Please try refreshing the page.
+          </div>
+        `;
+      }
+    }
+
+    function joinSession(id) {
+      const booking = bookings.find(b => b.id === id);
+      if (!booking) return;
+
+      // Create Teams meeting URL with booking details
+      const teamsUrl = `https://teams.microsoft.com/l/meetup-join/tutor-session-${id}`;
+      
+      // Show joining modal
+      const modal = document.createElement('div');
+      modal.className = 'modal fade';
+      modal.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Joining Session</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+              <div class="mb-4">
+                <i class="fas fa-video fa-3x text-primary mb-3"></i>
+                <h5>Ready to join your session with ${booking.tutor}?</h5>
+                <p class="text-muted">Subject: ${booking.subject}</p>
+                <p class="text-muted">Time: ${booking.time}</p>
+              </div>
+              <div class="d-grid gap-2">
+                <a href="${teamsUrl}" class="btn btn-primary" target="_blank">
+                  <i class="fab fa-microsoft me-2"></i>Join via Microsoft Teams
+                </a>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      const bsModal = new bootstrap.Modal(modal);
+      bsModal.show();
+      
+      modal.addEventListener('hidden.bs.modal', () => {
+        modal.remove();
+      });
+    }
+
+    function reschedule(id) {
+      const booking = bookings.find(b => b.id === id);
+      if (!booking) return;
+
+      const modal = document.createElement('div');
+      modal.className = 'modal fade';
+      modal.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Reschedule Session</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="form-label">Current Session</label>
+                <div class="p-3 bg-light rounded">
+                  <p class="mb-1"><strong>Date:</strong> ${booking.date}</p>
+                  <p class="mb-1"><strong>Time:</strong> ${booking.time}</p>
+                  <p class="mb-0"><strong>Tutor:</strong> ${booking.tutor}</p>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="new-date" class="form-label">New Date</label>
+                <input type="date" class="form-control" id="new-date" min="${new Date().toISOString().split('T')[0]}">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">New Time Slot</label>
+                <div class="time-slots d-flex flex-wrap gap-2" id="reschedule-time-slots">
+                  <!-- Time slots will be populated here -->
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary" onclick="confirmReschedule(${id})">
+                Confirm Reschedule
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      const bsModal = new bootstrap.Modal(modal);
+      bsModal.show();
+
+      // Populate time slots
+      const timeSlots = ['9:00 AM', '10:30 AM', '12:00 PM', '2:00 PM', '3:30 PM', '5:00 PM'];
+      const timeSlotsContainer = document.getElementById('reschedule-time-slots');
+      timeSlots.forEach(time => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn btn-outline-primary';
+        button.textContent = time;
+        button.onclick = () => selectTimeSlot(button);
+        timeSlotsContainer.appendChild(button);
+      });
+
+      modal.addEventListener('hidden.bs.modal', () => {
+        modal.remove();
+      });
+    }
+
+    function selectTimeSlot(button) {
+      document.querySelectorAll('#reschedule-time-slots .btn').forEach(btn => {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-outline-primary');
+      });
+      button.classList.remove('btn-outline-primary');
+      button.classList.add('btn-primary');
+    }
+
+    async function confirmReschedule(id) {
+      const newDate = document.getElementById('new-date').value;
+      const selectedTime = document.querySelector('#reschedule-time-slots .btn-primary')?.textContent;
+
+      if (!newDate || !selectedTime) {
+        showNotification('Please select both date and time', 'warning');
+        return;
+      }
+
+      const booking = bookings.find(b => b.id === id);
+      if (booking) {
+        try {
+          // Format new date for API
+          const apiDate = `${newDate}T${selectedTime.replace(' AM', ':00').replace(' PM', ':00')}`;
+          
+          // Update booking on server
+          const response = await fetch(`http://localhost:8080/api/bookings/${id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              ...booking,
+              sessionDate: apiDate,
+              startTime: selectedTime
+            })
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to update booking');
+          }
+          
+          // Update local booking
+          booking.date = new Date(newDate).toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+          booking.time = selectedTime;
+          filterBookings(currentFilter);
+          
+          const modal = document.querySelector('.modal');
+          bootstrap.Modal.getInstance(modal).hide();
+          
+          showNotification('Session rescheduled successfully!');
+        } catch (error) {
+          console.error('Error rescheduling booking:', error);
+          showNotification('Failed to reschedule booking', 'warning');
+        }
+      }
+    }
+
+    async function cancelBooking(id) {
+      const booking = bookings.find(b => b.id === id);
+      if (!booking) return;
+
+      const modal = document.createElement('div');
+      modal.className = 'modal fade';
+      modal.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Cancel Booking</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <div class="text-center mb-4">
+                <i class="fas fa-exclamation-circle text-warning fa-3x mb-3"></i>
+                <h5>Are you sure you want to cancel this session?</h5>
+                <p class="text-muted">This action cannot be undone.</p>
+              </div>
+              <div class="p-3 bg-light rounded mb-3">
+                <p class="mb-1"><strong>Tutor:</strong> ${booking.tutor}</p>
+                <p class="mb-1"><strong>Subject:</strong> ${booking.subject}</p>
+                <p class="mb-1"><strong>Date:</strong> ${booking.date}</p>
+                <p class="mb-0"><strong>Time:</strong> ${booking.time}</p>
+              </div>
+              <div class="mb-3">
+                <label for="cancel-reason" class="form-label">Reason for cancellation (optional)</label>
+                <textarea class="form-control" id="cancel-reason" rows="3"></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep Booking</button>
+              <button type="button" class="btn btn-danger" onclick="confirmCancellation(${id})">
+                Cancel Booking
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      const bsModal = new bootstrap.Modal(modal);
+      bsModal.show();
+
+      modal.addEventListener('hidden.bs.modal', () => {
+        modal.remove();
+      });
+    }
+
+    async function confirmCancellation(id) {
+      const booking = bookings.find(b => b.id === id);
+      const cancelReason = document.getElementById('cancel-reason').value;
+      
+      if (booking) {
+        try {
+          // Update booking status on server
+          const response = await fetch(`http://localhost:8080/api/bookings/${id}/status?status=cancelled`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to cancel booking');
+          }
+          
+          // Update local booking
+          booking.status = 'Cancelled';
+          filterBookings(currentFilter);
+          
+          const modal = document.querySelector('.modal');
+          bootstrap.Modal.getInstance(modal).hide();
+          
+          showNotification('Booking cancelled successfully');
+        } catch (error) {
+          console.error('Error cancelling booking:', error);
+          showNotification('Failed to cancel booking', 'warning');
+        }
+      }
+    }
+
+    function rateSession(id) {
+      const booking = bookings.find(b => b.id === id);
+      if (!booking) return;
+
+      const modal = document.createElement('div');
+      modal.className = 'modal fade';
+      modal.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Rate Your Session</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <div class="text-center mb-4">
+                <h6>Session with ${booking.tutor}</h6>
+                <p class="text-muted">${booking.subject} - ${booking.date}</p>
+              </div>
+              <div class="rating-container text-center mb-4">
+                <div class="stars mb-3">
+                  <i class="far fa-star fa-2x mx-1" data-rating="1"></i>
+                  <i class="far fa-star fa-2x mx-1" data-rating="2"></i>
+                  <i class="far fa-star fa-2x mx-1" data-rating="3"></i>
+                  <i class="far fa-star fa-2x mx-1" data-rating="4"></i>
+                  <i class="far fa-star fa-2x mx-1" data-rating="5"></i>
+                </div>
+                <p class="rating-text text-muted">Click to rate</p>
+              </div>
+              <div class="mb-3">
+                <label for="review-text" class="form-label">Your Review (optional)</label>
+                <textarea class="form-control" id="review-text" rows="3" 
+                  placeholder="Share your experience with this tutor..."></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary" id="submit-rating-btn" onclick="submitRating(${id})" disabled>
+                Submit Rating
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      // Add rating functionality
+      const stars = modal.querySelectorAll('.stars i');
+      const ratingText = modal.querySelector('.rating-text');
+      const submitBtn = modal.querySelector('#submit-rating-btn');
+      
+      stars.forEach(star => {
+        star.style.cursor = 'pointer';
+        star.addEventListener('mouseover', function() {
+          const rating = this.dataset.rating;
+          updateStars(stars, rating);
+          updateRatingText(rating);
+        });
+        
+        star.addEventListener('click', function() {
+          const rating = this.dataset.rating;
+          stars.forEach(s => s.dataset.selected = false);
+          this.dataset.selected = true;
+          submitBtn.disabled = false;
+        });
+      });
+
+      modal.querySelector('.stars').addEventListener('mouseout', function() {
+        const selectedStar = modal.querySelector('.stars i[data-selected="true"]');
+        if (selectedStar) {
+          updateStars(stars, selectedStar.dataset.rating);
+          updateRatingText(selectedStar.dataset.rating);
+        } else {
+          updateStars(stars, 0);
+          ratingText.textContent = 'Click to rate';
+        }
+      });
+
+      const bsModal = new bootstrap.Modal(modal);
+      bsModal.show();
+
+      modal.addEventListener('hidden.bs.modal', () => {
+        modal.remove();
+      });
+    }
+
+    function updateStars(stars, rating) {
+      stars.forEach(star => {
+        const starRating = star.dataset.rating;
+        star.className = starRating <= rating ? 'fas fa-star fa-2x mx-1 text-warning' : 'far fa-star fa-2x mx-1';
+      });
+    }
+
+    function updateRatingText(rating) {
+      const texts = [
+        'Click to rate',
+        'Poor',
+        'Fair',
+        'Good',
+        'Very Good',
+        'Excellent'
+      ];
+      const ratingText = document.querySelector('.rating-text');
+      ratingText.textContent = texts[rating] || texts[0];
+    }
+
+    async function submitRating(id) {
+      const selectedStar = document.querySelector('.stars i[data-selected="true"]');
+      const rating = selectedStar ? selectedStar.dataset.rating : null;
+      const review = document.getElementById('review-text').value;
+
+      if (rating) {
+        const booking = bookings.find(b => b.id === id);
+        if (booking) {
+          try {
+            // Send rating to server (would need an endpoint for this)
+            // For now, just update local booking data
+            booking.userRating = rating;
+            booking.userReview = review;
+            
+            const modal = document.querySelector('.modal');
+            bootstrap.Modal.getInstance(modal).hide();
+            
+            showNotification('Thank you for your rating!');
+          } catch (error) {
+            console.error('Error submitting rating:', error);
+            showNotification('Failed to submit rating', 'warning');
+          }
+        }
+      }
+    }
+
+    function bookAgain(id) {
+      window.location.href = 'Search.html';
+    }
+
+    function viewNotes(id) {
+      const booking = bookings.find(b => b.id === id);
+      if (!booking) return;
+
+      const modal = document.createElement('div');
+      modal.className = 'modal fade';
+      modal.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Session Notes</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <p><strong>Subject:</strong> ${booking.subject}</p>
+                <p><strong>Tutor:</strong> ${booking.tutor}</p>
+                <p><strong>Date:</strong> ${booking.date}</p>
+              </div>
+              <div class="bg-light p-3 rounded">
+                <h6 class="mb-3">Tutor's Notes</h6>
+                <p class="mb-0 text-muted">${booking.notes || 'No notes have been provided for this session.'}</p>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      const bsModal = new bootstrap.Modal(modal);
+      bsModal.show();
+
+      modal.addEventListener('hidden.bs.modal', () => {
+        modal.remove();
+      });
+    }
+
+    window.addEventListener('load', () => {
+      fetchBookings();
+      updateAuthButtons();
+    });
+  </script>
+</body>
+</html>

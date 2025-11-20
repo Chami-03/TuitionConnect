@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TuitionConnect - My Profile</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3f37c9;
+      --accent-color: #4cc9f0;
+      --success-color: #4caf50;
+      --warning-color: #ff9800;
+      --danger-color: #f44336;
+      --light-bg: linear-gradient(135deg, #e3f2fd 0%, #fce4ec 100%);
+      --dark-bg: linear-gradient(135deg, #1a1a1a 0%, #2d1b21 100%);
+    }
+
+    body {
+      background: var(--light-bg);
+      font-family: 'Segoe UI', sans-serif;
+      transition: all 0.3s ease;
+      min-height: 100vh;
+    }
+
+    body.dark-mode {
+      background: var(--dark-bg);
+      color: #e9ecef;
+    }
+
+    .navbar {
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.8) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .dark-mode .navbar {
+      background: rgba(33, 37, 41, 0.8) !important;
+    }
+
+    .profile-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .profile-sidebar {
+      position: sticky;
+      top: 2rem;
+    }
+
+    .profile-main {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 15px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 2rem;
+    }
+
+    .dark-mode .profile-main {
+      background: rgba(33, 37, 41, 0.9);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .profile-header {
+      text-align: center;
+      position: relative;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      margin-bottom: 2rem;
+    }
+
+    .dark-mode .profile-header {
+      border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .profile-pic-container {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      margin: 0 auto 1.5rem;
+    }
+
+    .profile-pic {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #fff;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .profile-pic:hover {
+      transform: scale(1.05);
+    }
+
+    .profile-pic-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 10px;
+      border-radius: 0 0 90px 90px;
+      opacity: 0;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .profile-pic-container:hover .profile-pic-overlay {
+      opacity: 1;
+    }
+
+    .profile-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 1rem;
+      border-radius: 10px;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .dark-mode .stat-value {
+      color: var(--accent-color);
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .dark-mode .stat-label {
+      color: #aaa;
+    }
+
+    .profile-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 0.75rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-weight: 500;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+
+    .action-btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn-edit {
+      background: var(--primary-color);
+      color: white;
+      transform-origin: center;
+    }
+
+    .btn-edit:active {
+      transform: scale(0.95);
+    }
+
+    .btn-delete {
+      background: var(--danger-color);
+      color: white;
+    }
+
+    .btn-delete:hover {
+      background: #d32f2f;
+      transform: translateY(-2px);
+    }
+
+    .profile-section {
+      margin-bottom: 2rem;
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .dark-mode .section-title {
+      color: var(--accent-color);
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .info-item {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1rem;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .dark-mode .info-item {
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .info-label {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+
+    .dark-mode .info-label {
+      color: #aaa;
+    }
+
+    .info-value {
+      font-weight: 500;
+    }
+
+    .skills-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .skill-tag {
+      background: var(--primary-color);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .skill-tag:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (max-width: 768px) {
+      .profile-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-sidebar {
+        position: static;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .achievement-card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .dark-mode .achievement-card {
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .achievement-card:hover {
+      transform: translateX(5px);
+      border-color: var(--primary-color);
+    }
+
+    .achievement-icon {
+      color: var(--primary-color);
+      margin-right: 0.5rem;
+    }
+
+    .progress-section {
+      margin-top: 2rem;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--primary-color);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      background: white;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 1000;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Modal Animation Styles */
+    .modal.fade .modal-dialog {
+      transform: scale(0.8);
+      opacity: 0;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .modal.show .modal-dialog {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .modal-content {
+      transform-origin: center;
+      animation: modalPop 0.3s ease-out;
+    }
+
+    .modal-backdrop.show {
+      opacity: 0.7;
+      backdrop-filter: blur(5px);
+    }
+
+    @keyframes modalPop {
+      0% {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      45% {
+        transform: scale(1.05);
+        opacity: 0.9;
+      }
+      80% {
+        transform: scale(0.95);
+        opacity: 0.95;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* Form Animation */
+    .modal.show .modal-body {
+      animation: slideUp 0.4s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Form Field Animation */
+    .form-control, .form-select {
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .preview-container {
+      transition: transform 0.3s ease;
+    }
+
+    .preview-container:hover {
+      transform: scale(1.05);
+    }
+
+    /* Save Button Animation */
+    .modal-footer .btn-primary {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .modal-footer .btn-primary::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+      );
+      transition: left 0.3s ease;
+    }
+
+    .modal-footer .btn-primary:hover::after {
+      left: 100%;
+    }
+
+    /* Loading State */
+    .btn-loading {
+      position: relative;
+      pointer-events: none;
+    }
+
+    .btn-loading::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Ripple Effect */
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(0);
+      animation: ripple 0.6s linear;
+      pointer-events: none;
+    }
+
+    @keyframes ripple {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light sticky-top">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">
+      <i class="fas fa-graduation-cap me-2"></i>TuitionConnect
+    </a>
+    <div class="d-flex align-items-center">
+      <button class="btn btn-outline-primary me-2 dark-toggle" onclick="toggleDarkMode()">
+        <i class="fas fa-moon"></i>
+      </button>
+      <div id="auth-buttons"></div>
+    </div>
+  </div>
+</nav>
+
+<div class="profile-container">
+  <div class="profile-grid">
+    <div class="profile-sidebar">
+      <div class="profile-main">
+        <div class="profile-header">
+          <div class="profile-pic-container">
+            <img src="https://via.placeholder.com/180" alt="Profile Picture" class="profile-pic" id="profile-pic">
+            <div class="profile-pic-overlay" onclick="document.getElementById('uploadProfilePic').click()">
+              <i class="fas fa-camera"></i> Change Photo
+            </div>
+            <input type="file" id="uploadProfilePic" accept="image/*" onchange="handleProfilePicUpload(event)" hidden>
+          </div>
+          <h3 id="profile-name">Loading...</h3>
+          <p class="text-muted" id="profile-email"></p>
+        </div>
+
+        <div class="profile-stats">
+          <div class="stat-card">
+            <div class="stat-value" id="sessions-count">0</div>
+            <div class="stat-label">Sessions</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="hours-count">0</div>
+            <div class="stat-label">Hours</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="rating-value">0.0</div>
+            <div class="stat-label">Rating</div>
+          </div>
+        </div>
+
+        <div class="profile-actions">
+          <button class="action-btn btn-edit" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+            <i class="fas fa-edit"></i> Edit Profile
+          </button>
+          <button class="action-btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-main">
+      <div class="profile-section">
+        <h4 class="section-title">
+          <i class="fas fa-info-circle"></i> Basic Information
+        </h4>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Phone</div>
+            <div class="info-value" id="profile-phone">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Role</div>
+            <div class="info-value" id="profile-role">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Joined</div>
+            <div class="info-value" id="profile-joined">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Status</div>
+            <div class="info-value" id="profile-status">Active</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <h4 class="section-title">
+          <i class="fas fa-user-circle"></i> About Me
+        </h4>
+        <p id="profile-bio" class="mb-4">-</p>
+      </div>
+
+      <div class="profile-section" id="subjects-section">
+        <h4 class="section-title">
+          <i class="fas fa-book"></i> Subjects
+        </h4>
+        <div class="skills-container" id="profile-subjects">
+          <!-- Subjects will be dynamically added here -->
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <h4 class="section-title">
+          <i class="fas fa-trophy"></i> Achievements
+        </h4>
+        <div id="achievements-container">
+          <div class="achievement-card">
+            <i class="fas fa-star achievement-icon"></i>
+            <span>Completed 10+ sessions successfully</span>
+          </div>
+          <div class="achievement-card">
+            <i class="fas fa-award achievement-icon"></i>
+            <span>Maintained 4.5+ rating for 3 months</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <h4 class="section-title">
+          <i class="fas fa-chart-line"></i> Progress
+        </h4>
+        <div class="progress-section">
+          <div class="d-flex justify-content-between mb-2">
+            <span>Profile Completion</span>
+            <span id="progress-percentage">75%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 75%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Profile</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="edit-profile-form" class="row g-3">
+          <div class="col-12">
+            <div class="text-center mb-4">
+              <div class="preview-container">
+                <img id="profilePicPreview" src="https://via.placeholder.com/150" alt="Profile Preview">
+              </div>
+              <div class="mt-2">
+                <label class="btn btn-outline-primary btn-sm">
+                  <i class="fas fa-upload"></i> Upload Photo
+                  <input type="file" id="edit-profile-pic" accept="image/*" onchange="handleProfilePicPreview(event)" hidden>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="edit-name" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Phone</label>
+            <input type="tel" class="form-control" id="edit-phone">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Bio</label>
+            <textarea class="form-control" id="edit-bio" rows="4"></textarea>
+          </div>
+          <div class="col-12" id="subjects-input">
+            <label class="form-label">Subjects</label>
+            <select class="form-select" id="edit-subjects" multiple>
+              <option value="OOP">Object-Oriented Programming (OOP)</option>
+              <option value="DSA">Data Structures and Algorithms (DSA)</option>
+              <option value="DM">Discrete Mathematics (DM)</option>
+              <option value="TW">Technical Writing (TW)</option>
+            </select>
+            <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple subjects</small>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveProfile()">
+          <i class="fas fa-save me-2"></i>Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete Account</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-danger">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          Warning: This action cannot be undone. All your data will be permanently deleted.
+        </div>
+        <form id="delete-account-form">
+          <div class="mb-3">
+            <label class="form-label">Type "DELETE" to confirm</label>
+            <input type="text" class="form-control" id="delete-confirm" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="deleteAccount()">
+          <i class="fas fa-trash me-2"></i>Delete Account
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  let currentUser = null;
+
+  function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const navbar = document.querySelector('.navbar');
+    if (document.body.classList.contains('dark-mode')) {
+      document.body.style.background = 'linear-gradient(to right, #1a1a1a, #2d1b21)';
+      navbar.classList.remove('navbar-light', 'bg-light');
+      navbar.classList.add('navbar-dark', 'bg-dark');
+      document.querySelector('.dark-toggle').innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+      document.body.style.background = 'linear-gradient(to right, #e3f2fd, #fce4ec)';
+      navbar.classList.remove('navbar-dark', 'bg-dark');
+      navbar.classList.add('navbar-light', 'bg-light');
+      document.querySelector('.dark-toggle').innerHTML = '<i class="fas fa-moon"></i>';
+    }
+    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+  }
+
+  function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+      <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i>
+      ${message}
+    `;
+    document.body.appendChild(notification);
+    setTimeout(() => {
+      notification.style.opacity = '0';
+      notification.style.transform = 'translateX(100%)';
+      setTimeout(() => notification.remove(), 500);
+    }, 3000);
+  }
+
+  function updateAuthButtons() {
+    const authButtons = document.getElementById('auth-buttons');
+    if (currentUser) {
+      authButtons.innerHTML = `
+        <span class="me-3">Welcome, ${currentUser.name}</span>
+        <button class="btn btn-outline-primary" onclick="logout()">Logout</button>
+      `;
+    } else {
+      authButtons.innerHTML = `
+        <a href="Login.html" class="btn btn-outline-primary me-2">Login</a>
+        <a href="studentregister.html" class="btn btn-primary">Sign Up</a>
+      `;
+    }
+  }
+
+  function loadUserProfile() {
+    const userJson = localStorage.getItem('user');
+    if (!userJson) {
+      window.location.href = 'Login.html';
+      return;
+    }
+
+    currentUser = JSON.parse(userJson);
+    updateAuthButtons();
+
+    // Get user details from the appropriate storage
+    const users = JSON.parse(localStorage.getItem(currentUser.role === 'tutor' ? 'tutors' : 'students') || '[]');
+    const userDetails = users.find(u => u.email === currentUser.email);
+
+    if (!userDetails) {
+      showNotification('User details not found', 'error');
+      return;
+    }
+
+    // Load profile picture if exists
+    if (userDetails.profilePicture) {
+      document.getElementById('profile-pic').src = userDetails.profilePicture;
+      document.getElementById('profilePicPreview').src = userDetails.profilePicture;
+    }
+
+    // Update profile display
+    document.getElementById('profile-name').textContent = userDetails.fullName;
+    document.getElementById('profile-email').textContent = userDetails.email;
+    document.getElementById('profile-phone').textContent = userDetails.phone || '-';
+    document.getElementById('profile-role').textContent = currentUser.role;
+    document.getElementById('profile-joined').textContent = new Date(userDetails.registrationDate).toLocaleDateString();
+    document.getElementById('profile-bio').textContent = userDetails.bio || '-';
+
+    // Show/hide and update subjects based on role
+    const subjectsRow = document.getElementById('subjects-section');
+    const subjectsInput = document.getElementById('subjects-input');
+    if (currentUser.role === 'tutor') {
+      subjectsRow.style.display = 'flex';
+      subjectsInput.style.display = 'block';
+      document.getElementById('profile-subjects').textContent = userDetails.subjects?.join(', ') || '-';
+    } else {
+      subjectsRow.style.display = 'none';
+      subjectsInput.style.display = 'none';
+    }
+
+    // Populate edit form
+    document.getElementById('edit-name').value = userDetails.fullName;
+    document.getElementById('edit-phone').value = userDetails.phone || '';
+    document.getElementById('edit-bio').value = userDetails.bio || '';
+    if (currentUser.role === 'tutor') {
+      const subjectsSelect = document.getElementById('edit-subjects');
+      Array.from(subjectsSelect.options).forEach(option => {
+        option.selected = userDetails.subjects?.includes(option.value);
+      });
+    }
+
+    // Update profile statistics
+    updateProfileStats();
+    calculateProfileProgress(currentUser);
+  }
+
+  function saveProfile() {
+    const saveButton = document.querySelector('.modal-footer .btn-primary');
+    saveButton.classList.add('btn-loading');
+    saveButton.innerHTML = '<span class="opacity-0">Saving...</span>';
+
+    setTimeout(() => {
+      const users = JSON.parse(localStorage.getItem(currentUser.role === 'tutor' ? 'tutors' : 'students') || '[]');
+      const userIndex = users.findIndex(u => u.email === currentUser.email);
+
+      if (userIndex === -1) {
+        showNotification('User not found', 'error');
+        return;
+      }
+
+      // Get the profile picture from the preview
+      const profilePicPreview = document.getElementById('profilePicPreview').src;
+
+      // Update user data
+      users[userIndex] = {
+        ...users[userIndex],
+        fullName: document.getElementById('edit-name').value,
+        phone: document.getElementById('edit-phone').value,
+        bio: document.getElementById('edit-bio').value,
+        profilePicture: profilePicPreview
+      };
+
+      if (currentUser.role === 'tutor') {
+        users[userIndex].subjects = Array.from(document.getElementById('edit-subjects').selectedOptions).map(opt => opt.value);
+      }
+
+      // Save updated data
+      localStorage.setItem(currentUser.role === 'tutor' ? 'tutors' : 'students', JSON.stringify(users));
+      
+      // Update current user name in session
+      currentUser.name = users[userIndex].fullName;
+      localStorage.setItem('user', JSON.stringify(currentUser));
+
+      // Remove loading state
+      saveButton.classList.remove('btn-loading');
+      saveButton.innerHTML = '<i class="fas fa-check me-2"></i>Saved!';
+
+      setTimeout(() => {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editProfileModal'));
+        modal.hide();
+        
+        // Reset button state after modal is hidden
+        setTimeout(() => {
+          saveButton.innerHTML = '<i class="fas fa-save me-2"></i>Save Changes';
+        }, 300);
+
+        showNotification('Profile updated successfully', 'success');
+        loadUserProfile();
+      }, 500);
+    }, 800); // Simulate some loading time for better UX
+  }
+
+  // Add smooth modal opening
+  document.getElementById('editProfileModal').addEventListener('show.bs.modal', function () {
+    document.body.style.overflow = 'hidden';
+    const formFields = this.querySelectorAll('.form-control, .form-select');
+    formFields.forEach((field, index) => {
+      field.style.opacity = '0';
+      field.style.transform = 'translateY(20px)';
+      setTimeout(() => {
+        field.style.transition = 'all 0.3s ease';
+        field.style.opacity = '1';
+        field.style.transform = 'translateY(0)';
+      }, 100 + (index * 50));
+    });
+  });
+
+  document.getElementById('editProfileModal').addEventListener('hide.bs.modal', function () {
+    document.body.style.overflow = '';
+  });
+
+  // Add ripple effect to buttons
+  function createRipple(event) {
+    const button = event.currentTarget;
+    const ripple = document.createElement('span');
+    const rect = button.getBoundingClientRect();
+    
+    const diameter = Math.max(rect.width, rect.height);
+    const radius = diameter / 2;
+    
+    ripple.style.width = ripple.style.height = `${diameter}px`;
+    ripple.style.left = `${event.clientX - rect.left - radius}px`;
+    ripple.style.top = `${event.clientY - rect.top - radius}px`;
+    ripple.className = 'ripple';
+    
+    button.appendChild(ripple);
+    
+    setTimeout(() => ripple.remove(), 600);
+  }
+
+  // Add ripple effect to all action buttons
+  document.querySelectorAll('.action-btn').forEach(button => {
+    button.addEventListener('click', createRipple);
+  });
+
+  // Add smooth form field focus animation
+  document.querySelectorAll('.form-control, .form-select').forEach(field => {
+    field.addEventListener('focus', function() {
+      this.closest('.col-md-6, .col-12').style.transform = 'translateY(-2px)';
+    });
+    
+    field.addEventListener('blur', function() {
+      this.closest('.col-md-6, .col-12').style.transform = 'translateY(0)';
+    });
+  });
+
+  function deleteAccount() {
+    const confirmText = document.getElementById('delete-confirm').value;
+    if (confirmText !== 'DELETE') {
+      showNotification('Please type "DELETE" to confirm', 'error');
+      return;
+    }
+
+    const users = JSON.parse(localStorage.getItem(currentUser.role === 'tutor' ? 'tutors' : 'students') || '[]');
+    const updatedUsers = users.filter(u => u.email !== currentUser.email);
+    localStorage.setItem(currentUser.role === 'tutor' ? 'tutors' : 'students', JSON.stringify(updatedUsers));
+    
+    // Clear session
+    localStorage.removeItem('user');
+    
+    showNotification('Account deleted successfully', 'success');
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 1500);
+  }
+
+  function logout() {
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+  }
+
+  function handleProfilePicUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+      if (validateImage(file)) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          // Update profile picture
+          document.getElementById('profile-pic').src = e.target.result;
+          document.getElementById('profilePicPreview').src = e.target.result;
+          
+          // Save to localStorage
+          saveProfilePicture(e.target.result);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  }
+
+  function handleProfilePicPreview(event) {
+    const file = event.target.files[0];
+    if (file) {
+      if (validateImage(file)) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('profilePicPreview').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  }
+
+  function validateImage(file) {
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      showNotification('Please upload an image file', 'error');
+      return false;
+    }
+    
+    // Check file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      showNotification('Image size should be less than 2MB', 'error');
+      return false;
+    }
+    
+    return true;
+  }
+
+  function saveProfilePicture(dataUrl) {
+    const users = JSON.parse(localStorage.getItem(currentUser.role === 'tutor' ? 'tutors' : 'students') || '[]');
+    const userIndex = users.findIndex(u => u.email === currentUser.email);
+    
+    if (userIndex !== -1) {
+      users[userIndex].profilePicture = dataUrl;
+      localStorage.setItem(currentUser.role === 'tutor' ? 'tutors' : 'students', JSON.stringify(users));
+      showNotification('Profile picture updated successfully', 'success');
+    }
+  }
+
+  function updateProfileStats() {
+    // Update profile statistics (example values)
+    document.getElementById('sessions-count').textContent = Math.floor(Math.random() * 50);
+    document.getElementById('hours-count').textContent = Math.floor(Math.random() * 100);
+    document.getElementById('rating-value').textContent = (4 + Math.random()).toFixed(1);
+  }
+
+  function updateSubjects(subjects) {
+    const container = document.getElementById('profile-subjects');
+    container.innerHTML = '';
+    
+    if (subjects && subjects.length > 0) {
+      subjects.forEach(subject => {
+        const tag = document.createElement('div');
+        tag.className = 'skill-tag';
+        tag.textContent = subject;
+        container.appendChild(tag);
+      });
+    } else {
+      container.innerHTML = '<p class="text-muted">No subjects added yet</p>';
+    }
+  }
+
+  function calculateProfileProgress(userDetails) {
+    let progress = 0;
+    let total = 0;
+    
+    // Check each field
+    if (userDetails.fullName) { progress++; } total++;
+    if (userDetails.email) { progress++; } total++;
+    if (userDetails.phone) { progress++; } total++;
+    if (userDetails.bio) { progress++; } total++;
+    if (userDetails.profilePicture) { progress++; } total++;
+    if (userDetails.subjects?.length > 0) { progress++; } total++;
+    
+    const percentage = Math.round((progress / total) * 100);
+    document.getElementById('progress-percentage').textContent = `${percentage}%`;
+    document.querySelector('.progress-fill').style.width = `${percentage}%`;
+  }
+
+  // Initialize
+  if (localStorage.getItem('darkMode') === 'true') {
+    toggleDarkMode();
+  }
+  
+  // Load profile on page load
+  loadUserProfile();
+</script>
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tuition Connect - Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Add Google Sign-In API -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Add Apple Sign-In API -->
+  <script type="text/javascript" src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
+  <style>
+    body {
+      background: linear-gradient(to right, #e3f2fd, #fce4ec);
+      font-family: 'Segoe UI', sans-serif;
+      transition: background 0.3s ease;
+    }
+    body.dark-mode {
+      background: linear-gradient(to right, #1a1a1a, #2d1b21);
+    }
+    .card {
+      border: none;
+      border-radius: 10px;
+    }
+    .card-body {
+      padding: 1.5rem;
+    }
+    h2 {
+      font-weight: 600;
+      font-size: 1.5rem;
+      color: #343a40;
+    }
+    .btn-primary {
+      background-color: #0d6efd;
+      border: none;
+      font-size: 0.9rem;
+    }
+    .btn-primary:hover {
+      background-color: #0b5ed7;
+    }
+    .btn-outline-primary {
+      font-size: 0.9rem;
+    }
+    .terms {
+      font-size: 0.75rem;
+      color: #6c757d;
+      text-align: center;
+      margin-top: 10px;
+    }
+    .contact-box {
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      font-size: 0.85rem;
+      margin-top: 30px;
+    }
+    .contact-box h4 {
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+    }
+    footer {
+      background-color: #343a40;
+      color: white;
+      padding: 15px 0;
+      text-align: center;
+      margin-top: 60px;
+      font-size: 0.9rem;
+    }
+    .dark-mode .contact-box {
+      background-color: #2d2d2d;
+      color: #e9ecef;
+    }
+    .dark-mode .terms {
+      color: #ced4da;
+    }
+    .dark-mode h2 {
+      color: #e9ecef;
+    }
+    .dark-mode .card {
+      background-color: #2d2d2d;
+    }
+    .dark-mode .form-control {
+      background-color: #343a40;
+      border-color: #495057;
+      color: #e9ecef;
+    }
+    .dark-mode .form-control:focus {
+      background-color: #3d4246;
+      color: #e9ecef;
+    }
+    .dark-mode .input-group-text {
+      background-color: #343a40;
+      border-color: #495057;
+      color: #e9ecef;
+    }
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      border-radius: 5px;
+      color: white;
+      z-index: 1000;
+      animation: slideIn 0.5s ease-out;
+    }
+    .notification.success {
+      background-color: #28a745;
+    }
+    .notification.error {
+      background-color: #dc3545;
+    }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .role-selector {
+      margin-bottom: 1rem;
+    }
+    .role-selector .btn {
+      width: 50%;
+      padding: 8px;
+      transition: all 0.3s ease;
+    }
+    .role-selector .btn.active {
+      background-color: #0d6efd;
+      color: white;
+    }
+    .spinner-border {
+      width: 1rem;
+      height: 1rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">TuitionConnect</a>
+    <div class="d-flex">
+      <button class="btn btn-outline-secondary me-2 dark-toggle" onclick="toggleDarkMode()"><i class="fas fa-moon"></i></button>
+      <a href="Login.html" class="btn btn-outline-primary me-2">Login</a>
+      <a href="studentregister.html" class="btn btn-primary">Sign Up</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5 text-center">
+      <div class="card shadow">
+        <div class="card-body">
+          <h2 class="mb-4">
+            <i class="fas fa-sign-in-alt me-2"></i>Welcome Back
+          </h2>
+
+          <div class="role-selector btn-group w-100 mb-4">
+            <button type="button" class="btn btn-outline-primary active" onclick="setRole('student')">Student</button>
+            <button type="button" class="btn btn-outline-primary" onclick="setRole('tutor')">Tutor</button>
+          </div>
+
+          <div id="error-alert" class="alert alert-danger d-none mb-3">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span id="error-message">Invalid email or password</span>
+          </div>
+
+          <form id="loginForm">
+            <div class="input-group mb-3">
+              <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+              <input type="email" class="form-control" id="email" placeholder="Email" required>
+            </div>
+
+            <div class="input-group mb-3">
+              <span class="input-group-text"><i class="fas fa-lock"></i></span>
+              <input type="password" class="form-control" id="password" placeholder="Password" required>
+              <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 mb-3 position-relative">
+              <span id="login-text"><i class="fas fa-unlock me-2"></i>Login</span>
+              <span class="spinner-border spinner-border-sm position-absolute" style="right: 10px;"></span>
+            </button>
+
+            <div class="terms">
+              By signing in, you agree with our 
+              <a href="Terms of Service.html">Terms & Conditions</a> and 
+              <a href="Terms of Service.html">Privacy Statement</a>.
+            </div>
+
+            <div class="text-center mt-3">
+              <small>Don't have an account?</small><br>
+              <div class="btn-group mt-2">
+                <a href="studentregister.html" class="btn btn-sm btn-outline-primary">Register as Student</a>
+                <a href="tutorregister.html" class="btn btn-sm btn-outline-primary">Register as Tutor</a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="contact-box mt-4">
+        <h4>Need Help?</h4>
+        <p><i class="fas fa-envelope me-2"></i>tutorbuddy110@gmail.com</p>
+        <p><i class="fas fa-phone me-2"></i>+94 773790835</p>
+        <p><i class="fas fa-map-marker-alt me-2"></i>sliit kurunegala</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  © 2025 TuitionConnect. All rights reserved.
+</footer>
+
+<div id="notification" class="notification d-none"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Global variable to track the current role
+  let currentRole = 'student';
+
+  // Set the active role based on user selection
+  function setRole(role) {
+    currentRole = role;
+    const buttons = document.querySelectorAll('.role-selector .btn');
+    buttons.forEach(button => {
+      button.classList.remove('active');
+    });
+    
+    if (role === 'student') {
+      buttons[0].classList.add('active');
+    } else {
+      buttons[1].classList.add('active');
+    }
+  }
+
+  // Toggle password visibility
+  function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const eyeIcon = document.querySelector('.fa-eye');
+    
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      eyeIcon.classList.remove('fa-eye');
+      eyeIcon.classList.add('fa-eye-slash');
+    } else {
+      passwordInput.type = 'password';
+      eyeIcon.classList.remove('fa-eye-slash');
+      eyeIcon.classList.add('fa-eye');
+    }
+  }
+
+  // Toggle dark mode
+  function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const darkToggle = document.querySelector('.dark-toggle i');
+    if (document.body.classList.contains('dark-mode')) {
+      darkToggle.classList.remove('fa-moon');
+      darkToggle.classList.add('fa-sun');
+      localStorage.setItem('darkMode', 'enabled');
+    } else {
+      darkToggle.classList.remove('fa-sun');
+      darkToggle.classList.add('fa-moon');
+      localStorage.setItem('darkMode', 'disabled');
+    }
+  }
+
+  // Show notification
+  function showNotification(message, type) {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.className = `notification ${type}`;
+    notification.classList.remove('d-none');
+    
+    // Hide after 3 seconds
+    setTimeout(() => {
+      notification.classList.add('d-none');
+    }, 3000);
+  }
+
+  // Show error message
+  function showError(message) {
+    const errorAlert = document.getElementById('error-alert');
+    const errorMessage = document.getElementById('error-message');
+    
+    errorMessage.textContent = message;
+    errorAlert.classList.remove('d-none');
+  }
+
+  // Hide error message
+  function hideError() {
+    const errorAlert = document.getElementById('error-alert');
+    errorAlert.classList.add('d-none');
+  }
+
+  // Login form submit handler
+  document.getElementById('loginForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    hideError();
+    
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    
+    // Show loading spinner
+    const spinner = document.querySelector('.spinner-border');
+    const loginText = document.getElementById('login-text');
+    spinner.style.display = 'inline-block';
+    loginText.style.opacity = '0.5';
+    
+    // Create login data
+    const loginData = {
+      email: email,
+      password: password
+    };
+    
+    // Log the data being sent (for debugging)
+    console.log('Login attempt with:', loginData);
+    
+    // Send login request to backend
+    fetch('http://localhost:8080/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(loginData)
+    })
+    .then(response => {
+      // First handle based on HTTP status
+      if (!response.ok) {
+        if (response.status === 401) {
+          // Unauthorized - incorrect credentials
+          throw new Error('Invalid email or password');
+        } else {
+          // Other server errors
+          throw new Error(`Server error: ${response.status}`);
+        }
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Login response:', data);
+      
+      if (data.success) {
+        // Store user data in localStorage
+        localStorage.setItem('user', JSON.stringify(data.data));
+        localStorage.setItem('role', data.role);
+        
+        // Show success notification
+        showNotification('Login successful!', 'success');
+        
+        // Redirect based on role (and overridden by the currentRole selector)
+        if (email === 'admin@gmail.com') {
+          window.location.href = 'tutormanagement.html';
+        } else {
+          window.location.href = 'index.html';
+        }
+      } else {
+        // If server returns success: false
+        showError(data.message || 'Login failed. Please try again.');
+      }
+    })
+    .catch(error => {
+      console.error('Login error:', error);
+      showError(error.message || 'Login failed. Please try again.');
+    })
+    .finally(() => {
+      // Hide loading spinner
+      spinner.style.display = 'none';
+      loginText.style.opacity = '1';
+    });
+  });
+
+  // Check for saved dark mode preference
+  document.addEventListener('DOMContentLoaded', function() {
+    if (localStorage.getItem('darkMode') === 'enabled') {
+      document.body.classList.add('dark-mode');
+      const darkToggle = document.querySelector('.dark-toggle i');
+      darkToggle.classList.remove('fa-moon');
+      darkToggle.classList.add('fa-sun');
+    }
+  });
+</script>
+</body>
+</html>

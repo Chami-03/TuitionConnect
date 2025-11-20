@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TuitionConnect - Tutor Management</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(to right, #e3f2fd, #fce4ec);
+      font-family: 'Segoe UI', sans-serif;
+      transition: background 0.3s ease;
+    }
+    body.dark-mode {
+      background: linear-gradient(to right, #1a1a1a, #2d1b21);
+    }
+    .dark-mode .table {
+      background-color: #2d2d2d;
+      color: #e9ecef;
+    }
+    .dark-mode .modal-content {
+      background-color: #2d2d2d;
+      color: #e9ecef;
+    }
+    footer {
+      background-color: #343a40;
+      color: white;
+      padding: 15px 0;
+      text-align: center;
+      margin-top: 60px;
+      font-size: 0.9rem;
+    }
+    .loader {
+      width: 48px;
+      height: 48px;
+      border: 5px solid #FFF;
+      border-bottom-color: #4a89dc;
+      border-radius: 50%;
+      display: inline-block;
+      box-sizing: border-box;
+      animation: rotation 1s linear infinite;
+    }
+
+    @keyframes rotation {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    .subject-badge {
+      display: inline-block;
+      padding: 0.25em 0.6em;
+      font-size: 75%;
+      font-weight: 700;
+      line-height: 1;
+      text-align: center;
+      white-space: nowrap;
+      vertical-align: baseline;
+      border-radius: 0.25rem;
+      margin-right: 0.2rem;
+      margin-bottom: 0.2rem;
+      background-color: #e9ecef;
+      color: #212529;
+    }
+    .dark-mode .subject-badge {
+      background-color: #495057;
+      color: #e9ecef;
+    }
+    .status-badge-pending {
+      background-color: #ffc107;
+      color: #212529;
+    }
+    .status-badge-active {
+      background-color: #28a745;
+      color: white;
+    }
+    .status-badge-inactive {
+      background-color: #6c757d;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">TuitionConnect</a>
+    <div class="d-flex">
+      <button class="btn btn-outline-secondary me-2 dark-toggle" onclick="toggleDarkMode()"><i class="fas fa-moon"></i></button>
+      <a href="Login.html" class="btn btn-outline-primary me-2">Login</a>
+      <a href="studentregister.html" class="btn btn-primary">Sign Up</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container my-5">
+  <h2 class="text-center mb-4"><i class="fas fa-users-cog me-2"></i>Manage Tutors</h2>
+
+  <div class="d-flex justify-content-between mb-3">
+    <div>
+      <select class="form-select d-inline-block w-auto me-2" id="subject-filter">
+        <option value="">All Subjects</option>
+        <option value="OOP">OOP</option>
+        <option value="DSA">DSA</option>
+        <option value="DM">DM</option>
+        <option value="TW">TW</option>
+      </select>
+      <select class="form-select d-inline-block w-auto" id="status-filter">
+        <option value="">All Statuses</option>
+        <option value="active">Active</option>
+        <option value="pending">Pending</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </div>
+    <a href="tutorregister.html">
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTutorModal">
+      <i class="fas fa-plus me-2"></i>Add New Tutor
+    </button>
+  </a>
+  </div>
+
+  <!-- Loading State -->
+  <div id="loading-state" class="text-center py-5">
+    <span class="loader"></span>
+    <p class="mt-3">Loading tutors...</p>
+  </div>
+
+  <!-- Error State -->
+  <div id="error-state" class="text-center py-5 d-none">
+    <i class="fas fa-exclamation-circle text-danger fa-3x mb-3"></i>
+    <h5>Failed to load tutors</h5>
+    <p class="text-muted">There was an error connecting to the server.</p>
+    <button class="btn btn-primary mt-2" onclick="loadTutors()">
+      <i class="fas fa-sync-alt me-2"></i>Try Again
+    </button>
+  </div>
+
+  <!-- Tutors Table -->
+  <div id="tutors-table-container" class="d-none">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Photo</th>
+          <th>Name</th>
+          <th>Subjects</th>
+          <th>Rate</th>
+          <th>Rating</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tutor-table">
+        <!-- Populated dynamically -->
+      </tbody>
+    </table>
+
+    <!-- No Tutors State -->
+    <div id="no-tutors-state" class="text-center py-5 d-none">
+      <i class="fas fa-user-tie text-muted fa-3x mb-3"></i>
+      <h5>No Tutors Found</h5>
+      <p class="text-muted">No tutors match your current filter criteria, or no tutors have been added yet.</p>
+      
+      <a href="tutorregister.html">
+      <button class="btn btn-primary mt-2" >
+        <i class="fas fa-plus me-2"></i>Add New Tutor
+      </button>
+    </a>
+    </div>
+
+    <!-- Pagination -->
+    <nav>
+      <ul class="pagination justify-content-center" id="pagination">
+        <!-- Pagination generated dynamically -->
+      </ul>
+    </nav>
+  </div>
+</div>
+
+<!-- Add/Edit Tutor Modal -->
+<div class="modal fade" id="addTutorModal" tabindex="-1" aria-labelledby="addTutorModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addTutorModalLabel">Add New Tutor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="tutor-form">
+          <input type="hidden" id="tutor-id">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="tutor-name" class="form-label">Full Name</label>
+              <input type="text" class="form-control" id="tutor-name" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="tutor-email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="tutor-email" required>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="tutor-phone" class="form-label">Phone</label>
+              <input type="tel" class="form-control" id="tutor-phone" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="hourly-rate" class="form-label">Hourly Rate ($)</label>
+              <input type="number" class="form-control" id="hourly-rate" required min="0" step="0.01">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="bio" class="form-label">Bio</label>
+            <textarea class="form-control" id="bio" rows="3"></textarea>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="education" class="form-label">Education</label>
+              <input type="text" class="form-control" id="education" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="experience" class="form-label">Experience (years)</label>
+              <input type="number" class="form-control" id="experience" required min="0">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Subjects</label>
+            <div class="border p-3">
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="subject-OOP" value="OOP">
+                <label class="form-check-label" for="subject-OOP">OOP</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="subject-DSA" value="DSA">
+                <label class="form-check-label" for="subject-DSA">DSA</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="subject-DM" value="DM">
+                <label class="form-check-label" for="subject-DM">DM</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="subject-TW" value="TW">
+                <label class="form-check-label" for="subject-TW">TW</label>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Availability</label>
+            <div class="border p-3">
+              <div class="mb-2">
+                <label class="form-label">Monday</label>
+                <div class="input-group">
+                  <input type="time" class="form-control" id="monday-start">
+                  <span class="input-group-text">to</span>
+                  <input type="time" class="form-control" id="monday-end">
+                </div>
+              </div>
+              <div class="mb-2">
+                <label class="form-label">Wednesday</label>
+                <div class="input-group">
+                  <input type="time" class="form-control" id="wednesday-start">
+                  <span class="input-group-text">to</span>
+                  <input type="time" class="form-control" id="wednesday-end">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Status</label>
+            <div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="status" id="status-active" value="active">
+                <label class="form-check-label" for="status-active">Active</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="status" id="status-pending" value="pending" checked>
+                <label class="form-check-label" for="status-pending">Pending</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="status" id="status-inactive" value="inactive">
+                <label class="form-check-label" for="status-inactive">Inactive</label>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="rating" class="form-label">Rating (0-5)</label>
+            <input type="number" class="form-control" id="rating" min="0" max="5" step="0.1" value="4.5">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Subject Expertise</label>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="subject-expertise">
+              <label class="form-check-label" for="subject-expertise">
+                Has subject expertise
+              </label>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="profile-pic" class="form-label">Profile Picture URL</label>
+            <input type="text" class="form-control" id="profile-pic" placeholder="https://example.com/profile.jpg">
+            <small class="form-text text-muted">Enter a URL for the tutor's profile picture</small>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="save-tutor-btn">Save Tutor</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this tutor? This action cannot be undone.</p>
+        <div class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          Deleting a tutor will remove all associated data, including bookings and reviews.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirm-delete-btn">
+          <i class="fas fa-trash me-2"></i>Delete Tutor
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  © 2025 TuitionConnect. All rights reserved.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Global variables
+  let tutors = [];
+  let filteredTutors = [];
+  let currentPage = 1;
+  const tutorsPerPage = 5;
+  let currentTutorId = null;
+  const apiUrl = 'http://localhost:8080/api/tutors';
+
+  // DOM Elements
+  const loadingState = document.getElementById('loading-state');
+  const errorState = document.getElementById('error-state');
+  const tutorsTableContainer = document.getElementById('tutors-table-container');
+  const noTutorsState = document.getElementById('no-tutors-state');
+  const tutorTable = document.getElementById('tutor-table');
+  const pagination = document.getElementById('pagination');
+  const subjectFilter = document.getElementById('subject-filter');
+  const statusFilter = document.getElementById('status-filter');
+  const tutorForm = document.getElementById('tutor-form');
+  const tutorModal = document.getElementById('addTutorModal');
+  const saveTutorBtn = document.getElementById('save-tutor-btn');
+  const deleteModal = document.getElementById('deleteModal');
+  const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+
+  // Toggle dark mode
+  function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const navbar = document.querySelector('.navbar');
+    if (document.body.classList.contains('dark-mode')) {
+      document.body.style.background = 'linear-gradient(to right, #1a1a1a, #2d1b21)';
+      navbar.classList.remove('navbar-light', 'bg-light');
+      navbar.classList.add('navbar-dark', 'bg-dark');
+      document.querySelector('.dark-toggle').innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+      document.body.style.background = 'linear-gradient(to right, #e3f2fd, #fce4ec)';
+      navbar.classList.remove('navbar-dark', 'bg-dark');
+      navbar.classList.add('navbar-light', 'bg-light');
+      document.querySelector('.dark-toggle').innerHTML = '<i class="fas fa-moon"></i>';
+    }
+    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+  }
+
+  // Load dark mode from localStorage
+  if (localStorage.getItem('darkMode') === 'true') {
+    toggleDarkMode();
+  }
+
+  // Load tutors from API
+  async function loadTutors() {
+    // Show loading state
+    loadingState.classList.remove('d-none');
+    errorState.classList.add('d-none');
+    tutorsTableContainer.classList.add('d-none');
+    
+    try {
+      // Get filter values
+      const subjectValue = subjectFilter.value;
+      const statusValue = statusFilter.value;
+      
+      // Construct URL with query parameters if needed
+      let url = apiUrl;
+      const params = [];
+      if (subjectValue) params.push(`subject=${subjectValue}`);
+      if (statusValue) params.push(`status=${statusValue}`);
+      if (params.length > 0) url += '?' + params.join('&');
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      tutors = await response.json();
+      filteredTutors = [...tutors];
+      
+      // Hide loading state
+      loadingState.classList.add('d-none');
+      
+      // Show tutors table or no tutors state
+      tutorsTableContainer.classList.remove('d-none');
+      
+      if (filteredTutors.length === 0) {
+        noTutorsState.classList.remove('d-none');
+        tutorTable.innerHTML = '';
+      } else {
+        noTutorsState.classList.add('d-none');
+        displayTutors();
+      }
+      
+      // Update pagination
+      updatePagination();
+      
+    } catch (error) {
+      console.error('Error loading tutors:', error);
+      loadingState.classList.add('d-none');
+      errorState.classList.remove('d-none');
+    }
+  }
+
+  // Display tutors on current page
+  function displayTutors() {
+    const startIndex = (currentPage - 1) * tutorsPerPage;
+    const endIndex = startIndex + tutorsPerPage;
+    const pageTutors = filteredTutors.slice(startIndex, endIndex);
+    
+    tutorTable.innerHTML = '';
+    
+    pageTutors.forEach(tutor => {
+      const row = document.createElement('tr');
+      
+      // Format subjects as badges
+      const subjectBadges = Array.isArray(tutor.subjects) 
+        ? tutor.subjects.map(subject => `<span class="subject-badge">${subject}</span>`).join(' ')
+        : '';
+      
+      // Get status badge class
+      const statusClass = tutor.status ? `status-badge-${tutor.status.toLowerCase()}` : 'status-badge-inactive';
+      
+      row.innerHTML = `
+        <td>
+          <img src="${tutor.profilePicture || 'https://via.placeholder.com/50'}" 
+               alt="${tutor.fullName || 'Tutor'}" 
+               width="50" 
+               class="rounded-circle">
+        </td>
+        <td>
+          <div class="d-flex flex-column">
+            <span class="fw-bold">${tutor.fullName || 'Unknown'}</span>
+            <small class="text-muted">${tutor.email || 'No email'}</small>
+          </div>
+        </td>
+        <td>${subjectBadges || 'None specified'}</td>
+        <td>$${tutor.hourlyRate?.toFixed(2) || '0.00'}/hr</td>
+        <td>
+          <div class="d-flex align-items-center">
+            <i class="fas fa-star text-warning me-1"></i>
+            <span>${tutor.rating || 'New'}</span>
+          </div>
+        </td>
+        <td>
+          <span class="badge ${statusClass}">
+            ${tutor.status ? tutor.status.charAt(0).toUpperCase() + tutor.status.slice(1) : 'Inactive'}
+          </span>
+        </td>
+        <td>
+          <div class="btn-group">
+            <button class="btn btn-outline-primary btn-sm" onclick="editTutor(${tutor.id})">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-outline-danger btn-sm" onclick="showDeleteModal(${tutor.id})">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </td>
+      `;
+      
+      tutorTable.appendChild(row);
+    });
+  }
+
+  // Update pagination controls
+  function updatePagination() {
+    const totalPages = Math.ceil(filteredTutors.length / tutorsPerPage);
+    
+    pagination.innerHTML = '';
+    
+    // Add Previous button
+    const prevLi = document.createElement('li');
+    prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+    prevLi.innerHTML = `
+      <a class="page-link" href="#" aria-label="Previous" ${currentPage > 1 ? 'onclick="changePage(' + (currentPage - 1) + ')"' : ''}>
+        <span aria-hidden="true">&laquo;</span>
+      </a>
+    `;
+    pagination.appendChild(prevLi);
+    
+    // Add page numbers
+    for (let i = 1; i <= totalPages; i++) {
+      const li = document.createElement('li');
+      li.className = `page-item ${currentPage === i ? 'active' : ''}`;
+      li.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
+      pagination.appendChild(li);
+    }
+    
+    // Add Next button
+    const nextLi = document.createElement('li');
+    nextLi.className = `page-item ${currentPage === totalPages || totalPages === 0 ? 'disabled' : ''}`;
+    nextLi.innerHTML = `
+      <a class="page-link" href="#" aria-label="Next" ${currentPage < totalPages ? 'onclick="changePage(' + (currentPage + 1) + ')"' : ''}>
+        <span aria-hidden="true">&raquo;</span>
+      </a>
+    `;
+    pagination.appendChild(nextLi);
+  }
+
+  // Change current page
+  function changePage(page) {
+    currentPage = page;
+    displayTutors();
+    updatePagination();
+    window.scrollTo(0, 0);
+  }
+
+  // Edit tutor handler
+  function editTutor(id) {
+    currentTutorId = id;
+    const tutor = tutors.find(t => t.id === id);
+    
+    if (!tutor) {
+      showNotification('Tutor not found', 'error');
+      return;
+    }
+    
+    // Update modal title
+    document.getElementById('addTutorModalLabel').textContent = 'Edit Tutor';
+    
+    // Fill form with tutor data
+    document.getElementById('tutor-id').value = tutor.id;
+    document.getElementById('tutor-name').value = tutor.fullName || '';
+    document.getElementById('tutor-email').value = tutor.email || '';
+    document.getElementById('tutor-phone').value = tutor.phone || '';
+    document.getElementById('hourly-rate').value = tutor.hourlyRate || 0;
+    document.getElementById('bio').value = tutor.bio || '';
+    document.getElementById('education').value = tutor.education || '';
+    document.getElementById('experience').value = tutor.experienceYears || 0;
+    document.getElementById('rating').value = tutor.rating || 4.5;
+    document.getElementById('profile-pic').value = tutor.profilePicture || '';
+    document.getElementById('subject-expertise').checked = tutor.subjectExpertise || false;
+    
+    // Set status radio button
+    const statusValue = tutor.status || 'pending';
+    document.querySelector(`input[name="status"][value="${statusValue}"]`).checked = true;
+    
+    // Clear subject checkboxes first
+    document.querySelectorAll('input[id^="subject-"]').forEach(checkbox => {
+      if (checkbox.id !== 'subject-expertise') {
+        checkbox.checked = false;
+      }
+    });
+    
+    // Set subject checkboxes
+    if (Array.isArray(tutor.subjects)) {
+      tutor.subjects.forEach(subject => {
+        const checkbox = document.getElementById(`subject-${subject}`);
+        if (checkbox) checkbox.checked = true;
+      });
+    }
+    
+    // Set availability times
+    document.getElementById('monday-start').value = '';
+    document.getElementById('monday-end').value = '';
+    document.getElementById('wednesday-start').value = '';
+    document.getElementById('wednesday-end').value = '';
+    
+    if (Array.isArray(tutor.availability)) {
+      tutor.availability.forEach(avail => {
+        if (avail.day === 'Monday') {
+          document.getElementById('monday-start').value = avail.startTime || '';
+          document.getElementById('monday-end').value = avail.endTime || '';
+        } else if (avail.day === 'Wednesday') {
+          document.getElementById('wednesday-start').value = avail.startTime || '';
+          document.getElementById('wednesday-end').value = avail.endTime || '';
+        }
+      });
+    }
+    
+    // Show modal
+    const bsModal = new bootstrap.Modal(tutorModal);
+    bsModal.show();
+  }
+
+  // Show delete confirmation modal
+  function showDeleteModal(id) {
+    currentTutorId = id;
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    deleteModal.show();
+  }
+
+  // Get form data for save/update
+  function getFormData() {
+    // Get selected subjects
+    const selectedSubjects = [];
+    document.querySelectorAll('input[id^="subject-"]:checked').forEach(checkbox => {
+      if (checkbox.id !== 'subject-expertise') {
+        selectedSubjects.push(checkbox.value);
+      }
+    });
+    
+    // Get availability
+    const availability = [];
+    
+    // Monday availability
+    const mondayStart = document.getElementById('monday-start').value;
+    const mondayEnd = document.getElementById('monday-end').value;
+    if (mondayStart && mondayEnd) {
+      availability.push({
+        day: 'Monday',
+        startTime: mondayStart,
+        endTime: mondayEnd
+      });
+    }
+    
+    // Wednesday availability
+    const wednesdayStart = document.getElementById('wednesday-start').value;
+    const wednesdayEnd = document.getElementById('wednesday-end').value;
+    if (wednesdayStart && wednesdayEnd) {
+      availability.push({
+        day: 'Wednesday',
+        startTime: wednesdayStart,
+        endTime: wednesdayEnd
+      });
+    }
+    
+    // Create tutor object
+    return {
+      id: document.getElementById('tutor-id').value || null,
+      fullName: document.getElementById('tutor-name').value,
+      email: document.getElementById('tutor-email').value,
+      phone: document.getElementById('tutor-phone').value,
+      hourlyRate: parseFloat(document.getElementById('hourly-rate').value),
+      bio: document.getElementById('bio').value,
+      education: document.getElementById('education').value,
+      experienceYears: parseInt(document.getElementById('experience').value),
+      subjects: selectedSubjects,
+      availability: availability,
+      status: document.querySelector('input[name="status"]:checked').value,
+      profilePicture: document.getElementById('profile-pic').value,
+      rating: parseFloat(document.getElementById('rating').value),
+      subjectExpertise: document.getElementById('subject-expertise').checked
+    };
+  }
+
+  // Save or update tutor
+  async function saveTutor() {
+    try {
+      const tutorData = getFormData();
+      const isEdit = tutorData.id !== null;
+      
+      // API URL and method
+      const url = isEdit ? `${apiUrl}/${tutorData.id}` : `${apiUrl}/register`;
+      const method = isEdit ? 'PUT' : 'POST';
+      
+      // Send request
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(tutorData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      // Hide modal
+      bootstrap.Modal.getInstance(tutorModal).hide();
+      
+      // Reset form
+      tutorForm.reset();
+      
+      // Show success notification
+      showNotification(`Tutor ${isEdit ? 'updated' : 'added'} successfully!`, 'success');
+      
+      // Reload tutors
+      loadTutors();
+      
+    } catch (error) {
+      console.error('Error saving tutor:', error);
+      showNotification(`Failed to ${tutorData.id ? 'update' : 'add'} tutor: ${error.message}`, 'error');
+    }
+  }
+
+  // Delete tutor
+  async function deleteTutor() {
+    if (!currentTutorId) return;
+    
+    try {
+      const response = await fetch(`${apiUrl}/${currentTutorId}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      // Hide modal
+      bootstrap.Modal.getInstance(deleteModal).hide();
+      
+      // Show success notification
+      showNotification('Tutor deleted successfully!', 'success');
+      
+      // Reload tutors
+      loadTutors();
+      
+    } catch (error) {
+      console.error('Error deleting tutor:', error);
+      showNotification(`Failed to delete tutor: ${error.message}`, 'error');
+      
+      // Hide modal
+      bootstrap.Modal.getInstance(deleteModal).hide();
+    }
+  }
+
+  // Show notification
+  function showNotification(message, type = 'info') {
+    const notificationEl = document.createElement('div');
+    notificationEl.className = `alert alert-${type === 'error' ? 'danger' : type} position-fixed top-0 end-0 m-3`;
+    notificationEl.style.zIndex = '1050';
+    notificationEl.style.maxWidth = '400px';
+    notificationEl.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+    notificationEl.style.animation = 'slideInRight 0.3s ease-in-out forwards';
+    
+    notificationEl.innerHTML = `
+      <div class="d-flex align-items-center">
+        <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : type === 'success' ? 'fa-check-circle' : 'fa-info-circle'} me-2"></i>
+        <div>${message}</div>
+        <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+      </div>
+    `;
+    
+    document.body.appendChild(notificationEl);
+    
+    // Add animation styles
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideInRight {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      
+      @keyframes fadeOut {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Auto-remove notification after 5 seconds
+    setTimeout(() => {
+      notificationEl.style.animation = 'fadeOut 0.5s ease-in-out forwards';
+      setTimeout(() => {
+        notificationEl.remove();
+      }, 500);
+    }, 5000);
+  }
+
+  // Reset form when modal is closed
+  tutorModal.addEventListener('hidden.bs.modal', function() {
+    tutorForm.reset();
+    document.getElementById('addTutorModalLabel').textContent = 'Add New Tutor';
+    document.getElementById('tutor-id').value = '';
+    currentTutorId = null;
+  });
+
+  // Event Listeners
+  document.addEventListener('DOMContentLoaded', function() {
+    // Load tutors on page load
+    loadTutors();
+    
+    // Add filter change event listeners
+    subjectFilter.addEventListener('change', function() {
+      currentPage = 1;
+      loadTutors();
+    });
+    
+    statusFilter.addEventListener('change', function() {
+      currentPage = 1;
+      loadTutors();
+    });
+    
+    // Add save button event listener
+    saveTutorBtn.addEventListener('click', saveTutor);
+    
+    // Add confirm delete button event listener
+    confirmDeleteBtn.addEventListener('click', deleteTutor);
+    
+    // Add form submit prevention
+    tutorForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      saveTutor();
+    });
+  });
+</script>
+</body>
+</html>
