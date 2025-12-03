@@ -99,6 +99,7 @@ Users can manage bookings and update their personal information anytime.
 
 Contributions are welcome. Before submitting a major change, open an issue to discuss your ideas. You may contribute to improving UI, optimizing backend logic, or enhancing database design.
 
+
 🙌 Acknowledgements
 
 • Spring Framework
